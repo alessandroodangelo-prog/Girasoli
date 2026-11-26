@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Girasoli</title>
+<meta name="theme-color" content="#FBF0E8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Girasoli">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+:root{--bg:#FBF0E8;--card:#FFFFFF;--ink:#2A1E18;--muted:#6E5D52;--line:#EFDDD0;--soft:#F8ECE3;--nav:#2A1E18;--imp:#C93A2E;--ins:#2A5CC9}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+input[type=checkbox]{width:22px;height:22px;margin:0;flex:none;accent-color:var(--me,#5A8A2A)}
+#app{max-width:480px;margin:0 auto;min-height:100dvh;padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.tiny{font-size:11px}
+.card{background:var(--card);border-radius:22px;box-shadow:0 1px 3px rgba(42,30,24,.07)}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block}
+.icon-btn{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;flex:none}
+.ghost-btn{width:36px;height:36px;border-radius:12px;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none}
+.demo{margin:12px 20px 0;padding:10px 14px;border-radius:16px;background:#FFF6D9;color:#5C4500;font-size:12px;line-height:1.5}
+.demo button{border:0;border-radius:999px;padding:4px 10px;margin:4px 4px 0 0;background:#fff;font-weight:700;font-size:12px}
+.demo button[aria-pressed=true]{background:var(--ink);color:#fff}
+/* profilo */
+.ph{display:flex;align-items:center;gap:14px;padding:26px 20px 4px}
+.avatar{width:62px;height:62px;border-radius:50%;border:3px solid var(--c);padding:3px;flex:none}
+.avatar>div{width:100%;height:100%;border-radius:50%;background:var(--cs);color:var(--cd);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.ph-name{font-size:23px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.ph-col{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:3px}
+.remind{margin:14px 20px 0;padding:16px}
+.remind h2{margin:0;font-size:16px;font-weight:800}
+.pill{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--s);border:0;width:100%;text-align:left;min-height:44px}
+.pill .t{font-weight:800;font-size:13px;color:var(--d);width:44px;flex:none}
+.pill .x{flex:1;min-width:0;font-size:14px;font-weight:600;line-height:1.3}
+.pill .g{font-size:11px;font-weight:700;color:var(--d);flex:none}
+.stack{display:flex;flex-direction:column;gap:8px}
+.sec{margin:12px 20px 0;overflow:hidden}
+.sec-h{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;border:0;background:none;text-align:left;min-height:62px}
+.sec-i{width:38px;height:38px;border-radius:12px;background:var(--ms);color:var(--md);display:flex;align-items:center;justify-content:center;flex:none}
+.sec-t{flex:1;font-weight:800;font-size:16px}
+.sec-m{font-size:12px;color:var(--muted);text-align:right}
+.sec-c{transition:transform .2s}
+.sec[data-open=true] .sec-c{transform:rotate(180deg)}
+.sec-b{padding:0 16px 16px}
+.lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+ul.list{list-style:none;margin:0;padding:0}
+ul.list li{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--soft)}
+ul.list label{flex:1;display:flex;align-items:center;gap:12px;padding:11px 0;min-height:44px;cursor:pointer}
+ul.list .txt{font-size:14px;line-height:1.35}
+ul.list .done .txt{text-decoration:line-through;color:var(--muted)}
+.add{display:flex;gap:8px;margin-top:10px}
+.add input,.add select{height:44px;border-radius:14px;border:1px solid var(--line);background:var(--bg);padding:0 12px;font-size:14px;min-width:0}
+.add input{flex:1}
+.add button{height:44px;padding:0 16px;border-radius:14px;border:0;background:var(--ink);color:#fff;font-weight:700;font-size:14px;flex:none}
+.empty{font-size:13px;color:var(--muted);padding:10px 0}
+.seg{display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--soft)}
+.seg button{flex:1;height:38px;border:0;border-radius:11px;background:transparent;color:var(--muted);font-weight:700;font-size:13px}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.under{display:flex;gap:18px;margin:12px 2px 4px}
+.under button{border:0;background:none;padding:6px 0;font-weight:700;font-size:13px;color:var(--muted);border-bottom:2px solid transparent}
+.under button[aria-pressed=true]{color:var(--ink);border-color:var(--me)}
+.mult{font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.m1{background:#F3E8DF;color:#4E4038}.m2{background:#FFEFD2;color:#7A4A00}.m3{background:var(--ink);color:#fff}
+.score{display:flex;align-items:center;gap:14px;padding:14px;border-radius:16px;background:var(--bg)}
+.score b{font-size:42px;font-weight:800;letter-spacing:-.03em;color:var(--md);line-height:1}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar>div{height:100%;border-radius:4px;background:var(--me)}
+.rank{display:flex;align-items:center;gap:10px;margin-top:8px}
+.rank .p{width:22px;font-weight:800;font-size:14px;color:var(--muted)}
+.rank .n{width:96px;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank .b{flex:1;height:10px;border-radius:5px;background:var(--soft);overflow:hidden}
+.rank .b>div{height:100%;border-radius:5px}
+.rank .v{width:40px;text-align:right;font-weight:800;font-size:14px}
+.link-btn{border:0;background:none;padding:10px 0;font-weight:700;font-size:13px;color:var(--md);text-decoration:underline;min-height:44px}
+.place{display:flex;gap:12px;align-items:center;padding:12px 12px 12px 14px;border-radius:16px;background:var(--bg);border:0;width:100%;text-align:left}
+.place .nm{font-weight:800;font-size:14px}
+.place .zn{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-top:2px}
+.stars{display:flex;align-items:center;gap:2px;margin-top:5px}
+.maps{flex:none;display:flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:12px;background:#fff;border:1px solid var(--line);font-size:12px;font-weight:800;text-decoration:none;color:var(--ink)}
+.dashed{width:100%;margin-top:10px;height:44px;border-radius:14px;border:1.5px dashed #DCC6B6;background:none;color:#4E4038;font-weight:700;font-size:13px}
+.tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--soft);color:#4E4038;white-space:nowrap}
+/* calendario */
+.ch{padding:24px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.ch h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em}
+.pillbtn{height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-weight:700;font-size:13px}
+.cseg{margin:14px 20px 0;display:flex;gap:4px;padding:4px;border-radius:16px;background:#F1E1D5}
+.cseg button{flex:1;height:40px;border-radius:12px;border:0;background:none;font-weight:700;font-size:14px;color:#4E4038}
+.cseg button[aria-pressed=true]{background:#fff;color:var(--ink);font-weight:800;box-shadow:0 1px 2px rgba(42,30,24,.08)}
+.cnav{margin:10px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.cnav div{font-weight:800;font-size:16px}
+.cnav button{width:44px;height:44px;border-radius:14px;border:0;background:none;display:flex;align-items:center;justify-content:center}
+.legend{margin:4px 20px 0;display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;font-weight:600;color:#4E4038}
+.legend span{display:flex;align-items:center;gap:5px}
+.days{margin:14px 20px 0;display:flex;flex-direction:column;gap:8px}
+.day{display:flex;gap:10px;padding:10px;border-radius:20px;background:#FFFCFA;box-shadow:0 1px 3px rgba(42,30,24,.07)}
+.day.today{background:#fff}
+.day-l{width:46px;flex:none;display:flex;flex-direction:column;align-items:center;padding-top:4px}
+.day-l span:first-child{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.day-l span:last-child{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800}
+.day.today .day-l span:last-child{background:var(--ink);color:#fff}
+.day-e{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.ev{display:flex;align-items:center;gap:8px;min-height:42px;padding:6px 10px;border-radius:13px;background:var(--s);border:0;width:100%;text-align:left}
+.ev .t{font-weight:800;font-size:12px;color:var(--d);width:40px;flex:none}
+.ev .x{flex:1;min-width:0;font-size:13px;font-weight:600;line-height:1.3}
+.ev .f{display:block;font-size:11px;font-weight:700;color:var(--d)}
+.free{font-size:13px;color:var(--muted);padding:10px 2px}
+.mgrid{margin:4px 20px 0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.mhead{margin:6px 20px 0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center;font-size:11px;font-weight:800;color:var(--muted)}
+.cell{height:70px;padding:4px 3px;border-radius:12px;border:2px solid transparent;background:#FFFCFA;display:flex;flex-direction:column;align-items:stretch;gap:2px;overflow:hidden;text-align:left}
+.cell.out{background:transparent}
+.cell.sel{border-color:var(--ink);background:#fff}
+.cell .n{align-self:center;width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+.cell.out .n{color:#A0918A}
+.cell.today .n{background:var(--ink);color:#fff}
+.cell .b{display:block;height:13px;line-height:13px;padding:0 3px;border-radius:4px;color:#fff;font-size:8.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell.out .b{opacity:.45}
+.cell .more{font-size:9px;font-weight:800;color:var(--muted);text-align:center}
+.fab{position:fixed;right:max(20px,calc(50% - 220px));bottom:calc(100px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;border:0;background:var(--me);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(42,30,24,.25);z-index:5}
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:10px 20px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
+.nav>div{max-width:440px;margin:0 auto;display:flex;gap:6px;background:var(--nav);border-radius:24px;padding:6px}
+.nav button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border-radius:18px;border:0;background:none;color:#fff;font-weight:700;font-size:14px}
+.nav button[aria-current=page]{background:#fff;color:var(--ink);font-weight:800}
+/* fogli */
+.scrim{position:fixed;inset:0;background:rgba(42,30,24,.42);z-index:20;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.sheet{width:100%;max-width:480px;max-height:92dvh;overflow-y:auto;background:#fff;border-radius:28px 28px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+.handle{width:40px;height:5px;border-radius:3px;background:#E6D6CA;align-self:center;flex:none}
+.sh-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.sh-top h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
+.close{width:44px;height:44px;border-radius:14px;border:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex:none}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#4E4038}
+.fld input,.fld textarea,.fld select{height:46px;border-radius:14px;border:1px solid var(--line);background:var(--bg);padding:0 14px;font-size:15px;font-weight:500;color:var(--ink);width:100%}
+.fld textarea{height:auto;padding:10px 14px;resize:vertical}
+.row{display:flex;gap:10px}
+.row>*{flex:1;min-width:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{flex:1;min-height:44px;padding:0 10px;border-radius:14px;border:2px solid transparent;background:var(--bg);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
+.chip[aria-pressed=true]{border-color:var(--cc,var(--ink));background:var(--cs,#fff)}
+.chip[disabled]{opacity:.4;cursor:not-allowed}
+.impbox{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;background:#FBE3DF;cursor:pointer}
+.impbox input{accent-color:var(--imp);width:24px;height:24px}
+.btn{height:52px;border-radius:16px;border:0;background:var(--ink);color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;text-decoration:none}
+.btn.light{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.red{background:#fff;color:var(--imp);border:1px solid var(--line)}
+.btns{display:flex;gap:8px}
+.info{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.45}
+.info svg{flex:none;color:var(--muted)}
+.chiptag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:800;background:var(--s);color:var(--d)}
+.bigstars{display:flex;gap:6px}
+.bigstars button{width:48px;height:48px;border:0;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.colors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.colors button{display:flex;align-items:center;gap:8px;min-height:48px;padding:0 12px;border-radius:14px;border:2px solid transparent;background:var(--bg);font-weight:700;font-size:13px;text-align:left}
+.colors button[aria-pressed=true]{border-color:var(--ink);background:#fff}
+.colors button[disabled]{opacity:.35;cursor:not-allowed}
+.photo-row{display:flex;align-items:center;gap:14px}
+.filebtn{display:inline-flex;align-items:center;height:44px;padding:0 14px;border-radius:14px;border:1px solid var(--line);font-weight:700;font-size:13px;cursor:pointer;background:#fff}
+.filebtn input{display:none}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom));background:var(--ink);color:#fff;padding:12px 16px;border-radius:14px;font-size:13px;font-weight:600;z-index:40;max-width:90vw}
+/* accesso */
+.login{max-width:420px;margin:0 auto;padding:12vh 24px 40px;display:flex;flex-direction:column;gap:14px}
+.login h1{margin:0;font-size:32px;font-weight:800;letter-spacing:-.02em}
+.err{color:var(--imp);font-size:13px;font-weight:600;min-height:18px}
+.loading{padding:30vh 0;text-align:center;color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">Caricamento…</div></div>
+<div id="sheet"></div>
+<script type="module">
+// ================== CONFIGURAZIONE ==================
+// Incolla qui il blocco firebaseConfig. Finché resta null il sito funziona in modalità prova
+// (i dati restano solo su questo dispositivo).
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC7KnpqtaR9nan20C3pLox1wtyxnbH0dfI",
+  authDomain: "girasoli-957e7.firebaseapp.com",
+  projectId: "girasoli-957e7",
+  storageBucket: "girasoli-957e7.firebasestorage.app",
+  messagingSenderId: "252325256926",
+  appId: "1:252325256926:web:d69bcca75511a196c0ac4f"
+};
+const FIREBASE_VERSION = '10.12.2';
+
+// ================== COSTANTI ==================
+const COLORS = [
+  { k:'oliva', n:'oliva', c:'#5A8A2A' }, { k:'viola', n:'viola', c:'#7650C6' }, { k:'arancio', n:'arancio', c:'#CF6A1E' },
+  { k:'rosa', n:'rosa', c:'#BF4678' }, { k:'acqua', n:'verde acqua', c:'#13867A' }, { k:'cacao', n:'cacao', c:'#8A5A33' }
+];
+const IMP = '#C93A2E', INS = '#2A5CC9', NEUTRO = '#8A7B71';
+const MULT = { 1:'Facile', 2:'Media', 3:'Difficile' };
+const TYPES = { todo:'Da fare', long:'Lungo termine', wishCose:'Wishlist cose', wishEsp:'Wishlist esperienze' };
+const CATS = [['colazione','Colazione'],['ristoranti','Ristoranti'],['gelaterie','Gelaterie']];
+const GIORNI = ['lunedì','martedì','mercoledì','giovedì','venerdì','sabato','domenica'];
+const GG = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const REP = { none:'Una volta', daily:'Ogni giorno', weekly:'Ogni settimana' };
+
+// ================== UTILITÀ ==================
+const pad = (n) => String(n).padStart(2, '0');
+const ymd = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const parse = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const dow = (d) => (d.getDay() + 6) % 7;
+const monday = (d) => addDays(d, -dow(d));
+const today = () => ymd(new Date());
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const longDate = (s) => { const d = parse(s); return cap(GIORNI[dow(d)]) + ' ' + d.getDate() + ' ' + MESI[d.getMonth()]; };
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const hx = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, t) => { const A = hx(a), B = hx(b); return '#' + A.map((v, i) => Math.round(v * (1 - t) + B[i] * t).toString(16).padStart(2, '0')).join(''); };
+const soft = (c) => mix(c, '#FFFFFF', 0.86);
+const deep = (c) => mix(c, '#000000', 0.3);
+const sum = (a) => a.reduce((x, y) => x + y, 0);
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+const mapsUrl = (q) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+const pv = (c) => `--c:${c};--s:${soft(c)};--d:${deep(c)}`;
+
+const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+const svg = (d, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" ${P}>${d}</svg>`;
+const IC = {
+  pencil:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/>', target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  check:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12l2.5 2.5 4.5-5"/>', flag:'<path d="M5 21V4h11l-2 4 2 4H5"/>',
+  gift:'<rect x="4" y="9" width="16" height="11" rx="2"/><path d="M12 9v11M4 13h16M12 9C10 5 6 5 6 7.5S10 9 12 9zm0 0c2-4 6-4 6-1.5S14 9 12 9z"/>',
+  food:'<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 21V3c-2 1-3 3-3 6v4h3"/>', done:'<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+  chev:'<path d="M6 9l6 6 6-6"/>', left:'<path d="M15 6l-6 6 6 6"/>', right:'<path d="M9 6l6 6-6 6"/>', plus:'<path d="M12 5v14M5 12h14"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>', user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  cal:'<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  map:'<path d="M9 4L3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5zM9 4v13.5M15 6.5V20"/>', text:'<path d="M5 6h14M5 11h14M5 16h9"/>',
+  rep:'<path d="M17 2l3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3M20 13v2a4 4 0 0 1-4 4H4"/>', undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'
+};
+const STAR = 'M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z';
+const stars = (r, s = 14) => [1, 2, 3, 4, 5].map((i) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path d="${STAR}" fill="${r >= i ? '#E39A2D' : r >= i - 0.5 ? '#F3D29C' : '#EADDD2'}"/></svg>`).join('');
+
+// ================== STATO ==================
+const S = {
+  mode: FIREBASE_CONFIG ? 'firebase' : 'demo', me: null, authed: false, loaded: false,
+  users: {}, events: [], items: [], goals: [], places: [],
+  tab: 'profilo', cal: 'week', anchor: today(), selDay: today(),
+  open: { obiettivi:true, dafare:true, lungo:false, wish:false, mangiare:false, fatte:false },
+  wTab: 'wishCose', fTab: 'ristoranti', fMode: 'visitati', sheet: null
+};
+try { Object.assign(S.open, JSON.parse(localStorage.getItem('vq-open') || '{}')); } catch (e) {}
+const saveOpen = () => { try { localStorage.setItem('vq-open', JSON.stringify(S.open)); } catch (e) {} };
+
+const me = () => S.users[S.me] || null;
+const other = () => Object.values(S.users).find((u) => u.id !== S.me) || null;
+const colorOf = (id) => { const u = S.users[id]; const c = u && COLORS.find((x) => x.k === u.color); return c ? c.c : NEUTRO; };
+const nameOf = (id) => (S.users[id] && S.users[id].name) || 'l’altra persona';
+const evColor = (ev) => ev.important ? IMP : ev.owner === 'both' ? INS : colorOf(ev.owner);
+const evTag = (ev, forList) => {
+  if (ev.important) return 'Importante';
+  if (ev.owner === 'both') return 'Insieme';
+  if (ev.owner === S.me) return ev.createdBy && ev.createdBy !== S.me ? 'da ' + nameOf(ev.createdBy) : (forList ? '' : nameOf(S.me));
+  return nameOf(ev.owner);
+};
+
+// ================== DATI: MODALITÀ PROVA ==================
+function seedDemo() {
+  const t = new Date(), m = monday(t), d = (n) => ymd(addDays(m, n)), td = ymd(t), tm = ymd(addDays(t, 1)), yd = ymd(addDays(t, -1));
+  const A = 'demo-a', B = 'demo-b';
+  const ev = (o) => ({ id: uid(), repeat:'none', important:false, place:'', maps:'', desc:'', time:'', end:'', createdAt: Date.now(), ...o, createdBy: o.createdBy || (o.owner === 'both' ? A : o.owner) });
+  const events = [
+    ev({ title:'Calciotto', date: d(-21), time:'20:30', end:'21:30', repeat:'weekly', owner:A, place:'Certosa, Roma', desc:'Partita del lunedì.' }),
+    ev({ title:'Pilates', date: d(-20), time:'18:30', end:'19:30', repeat:'weekly', owner:B }),
+    ev({ title:'Lezione · Lab. progettazione', date: d(1), time:'09:30', end:'12:30', owner:A }),
+    ev({ title:'Riunione UISP', date: d(2), time:'10:00', end:'11:30', owner:A }),
+    ev({ title:'Cena da mamma', date: d(2), time:'21:00', owner:'both' }),
+    ev({ title:'Ricevimento relatore tesi', date: td, time:'11:00', end:'11:30', owner:A, important:true, place:'Dipartimento di Architettura, Roma Tre', desc:'Portare l’indice e le prime tavole stampate.' }),
+    ev({ title:'Ritirare il pacco', date: td, time:'18:00', owner:A, createdBy:B, place:'Ufficio postale', desc:'Serve un documento.' }),
+    ev({ title:'Cinema', date: td, time:'20:30', end:'23:00', owner:'both', place:'Cinema Barberini, Roma', desc:'Spettacolo delle 20:45, biglietti già presi.' }),
+    ev({ title:'Dentista', date: tm, time:'15:00', end:'16:00', owner:B }),
+    ev({ title:'Aperitivo con Marco e Sara', date: tm, time:'19:30', owner:'both' }),
+    ev({ title:'Torneo regionale UISP', date: d(5), time:'09:00', end:'18:00', owner:A }),
+    ev({ title:'Mercato a Testaccio', date: d(5), time:'10:00', owner:B }),
+    ev({ title:'Pranzo dalla nonna', date: d(6), time:'13:00', owner:'both' }),
+    ev({ title:'Gita a Orvieto', date: d(-9), time:'08:30', owner:'both' }),
+    ev({ title:'Consegna tavole', date: d(-5), time:'09:00', owner:A, important:true }),
+    ev({ title:'Compleanno di Marco', date: d(9), time:'20:00', owner:'both' })
+  ];
+  const it = (owner, type, text, doneDay) => ({ id: uid(), owner, type, text, done: !!doneDay, doneDay: doneDay || '', createdAt: Date.now() });
+  const items = [
+    it(A,'todo','Stampare le tavole in A1', td), it(A,'todo','Rispondere alla mail UISP sul torneo'), it(A,'todo','Prenotare il campo per lunedì'), it(A,'todo','Comprare il regalo per Marco'),
+    it(A,'long','Rinnovare la carta d’identità'), it(A,'long','Scegliere il titolo della tesi'), it(A,'long','Imparare a fare il pane'),
+    it(A,'wishCose','Lampada da tavolo per lo studio'), it(A,'wishCose','Zaino da viaggio'), it(A,'wishEsp','Weekend a Lisbona'), it(A,'wishEsp','Corso di ceramica'),
+    it(A,'todo','Mandare il preventivo a UISP', yd), it(A,'wishCose','Borraccia termica', yd), it(A,'wishEsp','Cena al ristorante etiope', ymd(addDays(t, -3))),
+    it(B,'todo','Chiamare la banca'), it(B,'todo','Lavatrice'), it(B,'wishEsp','Concerto all’Auditorium')
+  ];
+  const goals = [];
+  const g = (owner, w, text, m, done) => goals.push({ id: uid(), owner, week: ymd(addDays(m0(), -7 * w)), text, mult: m, done, createdAt: Date.now() });
+  const m0 = () => m;
+  const hist = { [A]: [[1,1,0],[1,0,1],[0,1,1],[1,1,1],[1,1,0],[0,1,0],[1,1,0]], [B]: [[1,1,1],[1,0,1],[1,1,0],[1,1,1],[0,1,1],[1,1,1],[1,0,0]] };
+  for (const who of [A, B]) hist[who].forEach((pat, i) => { const w = 7 - i; ['Palestra','Leggere','Progetto'].forEach((x, j) => g(who, w, x, [2, 1, 3][j], !!pat[j])); });
+  g(A, 0, 'Palestra 3 volte', 2, true); g(A, 0, 'Finire il capitolo 2 della tesi', 3, false); g(A, 0, 'Leggere 50 pagine', 1, true); g(A, 0, 'Cucinare 2 ricette nuove', 1, true); g(A, 0, 'Niente telefono dopo le 23', 2, true);
+  g(B, 0, 'Correre 2 volte', 2, true); g(B, 0, 'Finire il libro', 1, false); g(B, 0, 'Sistemare l’armadio', 2, true);
+  const pl = (cat, name, zone, visited, votes) => ({ id: uid(), cat, name, zone, maps:'', visited, votes: votes || {}, createdBy: A, createdAt: Date.now() });
+  const places = [
+    pl('colazione','Roscioli Caffè','Campo de’ Fiori', true, { [A]:5, [B]:4 }), pl('colazione','Pasticceria Regoli','Esquilino', true, { [A]:5, [B]:5 }), pl('colazione','Marigold','Ostiense', false),
+    pl('ristoranti','Da Enzo al 29','Trastevere', true, { [A]:5, [B]:4 }), pl('ristoranti','Trapizzino','Testaccio', true, { [A]:4, [B]:4 }), pl('ristoranti','Santo Palato','San Giovanni', false),
+    pl('gelaterie','Fatamorgana','Monti', true, { [A]:4, [B]:5 }), pl('gelaterie','Gelateria del Teatro','Ponte', false)
+  ];
+  return { users: [{ id:A, name:'Alessandro', color:'oliva', photo:'' }, { id:B, name:'Giulia', color:'viola', photo:'' }], events, items, goals, places };
+}
+
+const LocalDB = {
+  key: 'vq-demo-v1',
+  start(onData) {
+    try { this.data = JSON.parse(localStorage.getItem(this.key)); } catch (e) {}
+    if (!this.data) { this.data = seedDemo(); this.save(); }
+    this.onData = onData;
+    S.me = localStorage.getItem('vq-demo-me') || 'demo-a'; S.authed = true;
+    onData(this.data);
+  },
+  save() { try { localStorage.setItem(this.key, JSON.stringify(this.data)); } catch (e) {} },
+  emit() { this.save(); this.onData(this.data); },
+  async add(col, obj) { const id = uid(); this.data[col].push({ ...obj, id }); this.emit(); return id; },
+  async update(col, id, patch) { this.data[col] = this.data[col].map((x) => x.id === id ? { ...x, ...patch } : x); this.emit(); },
+  async put(col, id, obj) { const i = this.data[col].findIndex((x) => x.id === id); if (i < 0) this.data[col].push({ ...obj, id }); else this.data[col][i] = { ...this.data[col][i], ...obj }; this.emit(); },
+  async remove(col, id) { this.data[col] = this.data[col].filter((x) => x.id !== id); this.emit(); }
+};
+
+// ================== DATI: FIREBASE ==================
+const FireDB = {
+  async start(onData) {
+    const base = 'https://www.gstatic.com/firebasejs/' + FIREBASE_VERSION + '/';
+    const [app, fs, au] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-firestore.js'), import(base + 'firebase-auth.js')]);
+    this.fs = fs; this.au = au;
+    const a = app.initializeApp(FIREBASE_CONFIG);
+    this.db = fs.getFirestore(a); this.auth = au.getAuth(a);
+    this.unsubs = [];
+    au.onAuthStateChanged(this.auth, (user) => {
+      this.unsubs.forEach((u) => u()); this.unsubs = [];
+      S.authed = !!user; S.me = user ? user.uid : null; S.loaded = false;
+      if (!user) { render(); return; }
+      const data = { users: [], events: [], items: [], goals: [], places: [] };
+      const got = new Set();
+      Object.keys(data).forEach((col) => {
+        this.unsubs.push(fs.onSnapshot(fs.collection(this.db, col), (snap) => {
+          data[col] = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+          got.add(col);
+          if (got.size === 5) onData(data);
+        }, (err) => toast('Errore del database: ' + err.code)));
+      });
+    });
+  },
+  login(email, pw) { return this.au.signInWithEmailAndPassword(this.auth, email, pw); },
+  logout() { return this.au.signOut(this.auth); },
+  add(col, obj) { return this.fs.addDoc(this.fs.collection(this.db, col), obj).then((r) => r.id); },
+  update(col, id, patch) { return this.fs.updateDoc(this.fs.doc(this.db, col, id), patch); },
+  put(col, id, obj) { return this.fs.setDoc(this.fs.doc(this.db, col, id), obj, { merge: true }); },
+  remove(col, id) { return this.fs.deleteDoc(this.fs.doc(this.db, col, id)); }
+};
+const DB = S.mode === 'firebase' ? FireDB : LocalDB;
+const run = (p) => Promise.resolve(p).catch((e) => toast('Non sono riuscito a salvare: ' + (e.code || e.message)));
+
+function onData(data) {
+  S.users = Object.fromEntries(data.users.map((u) => [u.id, u]));
+  S.events = data.events; S.items = data.items; S.goals = data.goals; S.places = data.places;
+  S.loaded = true;
+  render();
+  if (!me() && !S.sheet) openProfile(true);
+}
+
+// ================== CALCOLI ==================
+function occurrences(from, to) {
+  const F = parse(from), T = parse(to), res = [];
+  for (const ev of S.events) {
+    if (!ev.date) continue;
+    const st = parse(ev.date), skip = ev.skip || [];
+    const push = (d) => { const s = ymd(d); if (!skip.includes(s)) res.push({ ev, date: s }); };
+    if (ev.repeat === 'daily') { for (let d = st > F ? st : F; d <= T; d = addDays(d, 1)) push(d); }
+    else if (ev.repeat === 'weekly') { let d = st > F ? st : F; while (dow(d) !== dow(st)) d = addDays(d, 1); for (; d <= T; d = addDays(d, 7)) push(d); }
+    else if (st >= F && st <= T) push(st);
+  }
+  return res.sort((a, b) => a.date.localeCompare(b.date) || (a.ev.time || '').localeCompare(b.ev.time || ''));
+}
+function scoreFor(id, wk) {
+  const gs = S.goals.filter((g) => g.owner === id && g.week === wk);
+  if (!gs.length) return null;
+  const tot = sum(gs.map((g) => g.mult)), done = sum(gs.map((g) => g.done ? g.mult : 0));
+  const pct = Math.round(done / tot * 100), bonus = Math.min(20, tot * 2);
+  return { tot, done, pct, bonus, score: pct + bonus };
+}
+const weekOf = (s) => ymd(monday(parse(s)));
+
+// ================== RENDER ==================
+const $app = document.getElementById('app'), $sheet = document.getElementById('sheet');
+function render() {
+  if (S.mode === 'firebase' && !S.authed) { $app.innerHTML = loginView(); return; }
+  if (!S.loaded) { $app.innerHTML = '<div class="loading">Caricamento…</div>'; return; }
+  const a = document.activeElement, keep = a && a.id && $app.contains(a) ? { id: a.id, v: a.value, s: a.selectionStart, e: a.selectionEnd } : null;
+  const c = colorOf(S.me);
+  document.documentElement.style.setProperty('--me', c);
+  document.documentElement.style.setProperty('--ms', soft(c));
+  document.documentElement.style.setProperty('--md', deep(c));
+  $app.innerHTML = (S.tab === 'profilo' ? profileView() : calendarView()) + navView();
+  if (keep) { const el = document.getElementById(keep.id); if (el) { el.value = keep.v; el.focus(); try { el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
+}
+
+function navView() {
+  return `<nav class="nav" aria-label="Navigazione"><div>
+    <button data-a="tab" data-v="profilo" ${S.tab === 'profilo' ? 'aria-current="page"' : ''}>${svg(IC.user)}Profilo</button>
+    <button data-a="tab" data-v="calendario" ${S.tab === 'calendario' ? 'aria-current="page"' : ''}>${svg(IC.cal)}Calendario</button>
+  </div></nav>${S.tab === 'calendario' ? `<button class="fab" data-a="ev-new" aria-label="Aggiungi impegno">${svg(IC.plus, 26)}</button>` : ''}`;
+}
+
+function avatar(u, size) {
+  const c = colorOf(u.id), st = `--c:${c};--cs:${soft(c)};--cd:${deep(c)}` + (size ? `;width:${size}px;height:${size}px` : '');
+  const ini = (u.name || '?').trim().split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase();
+  return `<div class="avatar" style="${st}"><div>${u.photo ? `<img src="${esc(u.photo)}" alt="">` : esc(ini)}</div></div>`;
+}
+
+function profileView() {
+  const u = me() || { id: S.me, name: '', color: '' };
+  const col = COLORS.find((x) => x.k === u.color);
+  const demo = S.mode === 'demo' ? `<div class="demo"><b>Modalità prova.</b> I dati restano solo su questo dispositivo finché non colleghiamo il database. Prova come:<br>${Object.values(S.users).map((x) => `<button data-a="demo-user" data-v="${x.id}" aria-pressed="${x.id === S.me}">${esc(x.name)}</button>`).join('')}<button data-a="demo-reset">Ricomincia la prova</button></div>` : '';
+  return demo + `<header class="ph">${avatar(u)}<div style="flex:1;min-width:0"><div class="small muted">Ciao,</div><div class="ph-name">${esc(u.name)}</div><div class="ph-col"><span class="dot" style="background:${colorOf(u.id)}"></span>Il tuo colore: ${col ? col.n : '—'}</div></div><button class="icon-btn" data-a="profile-edit" aria-label="Modifica nome, foto e colore">${svg(IC.pencil)}</button></header>`
+    + reminderView() + goalsSection() + listSection('dafare', IC.check, 'Da fare', 'todo') + listSection('lungo', IC.flag, 'Da fare · lungo termine', 'long') + wishSection() + foodSection() + doneSection();
+}
+
+function reminderView() {
+  const t = today();
+  const occ = occurrences(t, t).filter((o) => o.ev.repeat === 'none' && (o.ev.owner === S.me || o.ev.owner === 'both'));
+  const d = new Date();
+  return `<section class="card remind" aria-label="Promemoria di oggi"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>Oggi, ${GIORNI[dow(d)]} ${d.getDate()}</h2><span class="small muted">${occ.length ? occ.length + ' da ricordare' : ''}</span></div>
+    <div class="stack" style="margin-top:12px">${occ.length ? occ.map((o) => `<button class="pill" style="${pv(evColor(o.ev))}" data-a="ev-open" data-id="${o.ev.id}" data-d="${o.date}"><span class="dot" style="background:var(--c)"></span><span class="t">${o.ev.time || '—'}</span><span class="x">${esc(o.ev.title)}</span><span class="g">${esc(evTag(o.ev, true))}</span></button>`).join('') : '<div class="empty">Niente di particolare oggi.</div>'}</div>
+    <div class="tiny muted" style="margin-top:10px">Le cose fisse, che si ripetono, non compaiono qui.</div></section>`;
+}
+
+function section(key, icon, title, meta, body) {
+  const o = !!S.open[key];
+  return `<section class="card sec" data-open="${o}"><button class="sec-h" data-a="sec" data-k="${key}" aria-expanded="${o}"><span class="sec-i">${svg(icon)}</span><span class="sec-t">${title}</span><span class="sec-m">${meta}</span><span class="sec-c">${svg(IC.chev)}</span></button>${o ? `<div class="sec-b">${body()}</div>` : ''}</section>`;
+}
+
+function goalsSection() {
+  const wk = weekOf(today()), mine = S.goals.filter((g) => g.owner === S.me && g.week === wk).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  const sc = scoreFor(S.me, wk);
+  return section('obiettivi', IC.target, 'Obiettivi', sc ? sc.done + '/' + sc.tot + ' punti' : 'nessuno', () => {
+    const m = parse(wk), e = addDays(m, 6);
+    const label = m.getMonth() === e.getMonth() ? `${m.getDate()}–${e.getDate()} ${MESI[e.getMonth()].slice(0, 3)}` : `${m.getDate()} ${MESI[m.getMonth()].slice(0, 3)} – ${e.getDate()} ${MESI[e.getMonth()].slice(0, 3)}`;
+    const lastWk = ymd(addDays(m, -7)), lastMine = S.goals.filter((g) => g.owner === S.me && g.week === lastWk);
+    let h = `<div class="score"><b>${sc ? sc.score : '–'}</b><div style="flex:1"><div style="font-size:13px;font-weight:700">Settimana ${label}</div><div class="small muted">${sc ? `${sc.pct}% fatto · bonus impegno +${sc.bonus}` : 'Aggiungi gli obiettivi della settimana'}</div><div class="bar"><div style="width:${sc ? sc.pct : 0}%"></div></div></div></div>`;
+    h += `<ul class="list" style="margin-top:6px">${mine.map((g) => `<li class="${g.done ? 'done' : ''}"><label><input type="checkbox" data-a="goal-toggle" data-id="${g.id}" ${g.done ? 'checked' : ''}><span class="txt">${esc(g.text)}</span></label><span class="mult m${g.mult}">×${g.mult} ${MULT[g.mult]}</span><button class="ghost-btn" data-a="goal-del" data-id="${g.id}" aria-label="Elimina obiettivo">${svg(IC.x, 16)}</button></li>`).join('')}</ul>`;
+    if (!mine.length && lastMine.length) h += `<button class="link-btn" data-a="goal-copy">Riprendi gli obiettivi della settimana scorsa (${lastMine.length})</button>`;
+    h += `<form class="add" data-f="goal-add"><input id="in-goal" placeholder="Nuovo obiettivo" aria-label="Nuovo obiettivo" autocomplete="off"><select id="in-mult" aria-label="Difficoltà"><option value="1">×1</option><option value="2">×2</option><option value="3">×3</option></select><button>Aggiungi</button></form>`;
+    h += `<div class="tiny muted" style="margin-top:8px;line-height:1.5">Punteggio = percentuale di punti fatti + 2 per ogni punto di difficoltà messo (massimo +20). ×1 facile · ×2 media · ×3 difficile.</div>`;
+    const users = Object.values(S.users);
+    const rank = users.map((u) => ({ u, s: scoreFor(u.id, wk) })).sort((a, b) => (b.s ? b.s.score : -1) - (a.s ? a.s.score : -1));
+    h += `<div class="lbl" style="margin-top:18px">Classifica · questa settimana</div>${rank.map((r, i) => `<div class="rank"><span class="p">${r.s ? i + 1 + '°' : ''}</span><span class="dot" style="background:${colorOf(r.u.id)}"></span><span class="n">${esc(r.u.name)}</span><div class="b"><div style="width:${r.s ? Math.min(100, r.s.score / 1.2) : 0}%;background:${colorOf(r.u.id)}"></div></div><span class="v">${r.s ? r.s.score : '–'}</span></div>`).join('')}`;
+    const last = users.map((u) => ({ u, s: scoreFor(u.id, lastWk) })).filter((r) => r.s).sort((a, b) => b.s.score - a.s.score);
+    if (last.length) h += `<div class="small muted" style="margin-top:8px">Settimana scorsa: ${last.map((r) => esc(r.u.name) + ' ' + r.s.score).join(' · ')}</div>`;
+    h += trendChart(users, m);
+    return h;
+  });
+}
+
+function trendChart(users, m) {
+  const weeks = Array.from({ length: 8 }, (_, i) => ymd(addDays(m, -7 * (7 - i))));
+  const X = (i) => Math.round(30 + i * (282 / 7)), Y = (v) => Math.round(120 - Math.min(v, 120) * 0.88);
+  const lines = users.map((u) => {
+    const c = colorOf(u.id), vals = weeks.map((w) => { const s = scoreFor(u.id, w); return s ? s.score : null; });
+    let d = '', pen = false;
+    vals.forEach((v, i) => { if (v == null) { pen = false; return; } d += (pen ? 'L' : 'M') + X(i) + ' ' + Y(v) + ' '; pen = true; });
+    const li = vals.map((v, i) => v == null ? -1 : i).filter((i) => i >= 0).pop();
+    return { u, c, d, vals, dot: li >= 0 ? `<circle cx="${X(li)}" cy="${Y(vals[li])}" r="4.5" fill="${c}" stroke="#fff" stroke-width="2"/>` : '' };
+  });
+  const avg = (vals) => { const v = vals.filter((x) => x != null); return v.length ? Math.round(sum(v) / v.length) : '–'; };
+  return `<div class="lbl" style="margin-top:20px">Andamento · ultime 8 settimane</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12px;font-weight:700">${lines.map((l) => `<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:3px;border-radius:2px;background:${l.c}"></span>${esc(l.u.name)} · media ${avg(l.vals)}</span>`).join('')}</div>
+    <svg viewBox="0 0 318 128" width="100%" role="img" aria-label="Andamento dei punteggi nelle ultime 8 settimane" style="display:block;margin-top:6px">
+      <line x1="24" y1="${Y(100)}" x2="318" y2="${Y(100)}" stroke="#F3E8DF"/><line x1="24" y1="${Y(50)}" x2="318" y2="${Y(50)}" stroke="#F3E8DF"/><line x1="24" y1="${Y(0)}" x2="318" y2="${Y(0)}" stroke="#EFDDD0"/>
+      <text x="0" y="${Y(100) + 3}" font-size="9" fill="#6E5D52">100</text><text x="6" y="${Y(50) + 3}" font-size="9" fill="#6E5D52">50</text>
+      ${lines.map((l) => `<path d="${l.d}" fill="none" stroke="${l.c}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`).join('')}${lines.map((l) => l.dot).join('')}
+    </svg>
+    <div style="display:flex;justify-content:space-between;padding-left:18px;font-size:10px;color:var(--muted)">${weeks.map((w) => { const d = parse(w); return `<span>${d.getDate()}/${d.getMonth() + 1}</span>`; }).join('')}</div>`;
+}
+
+const visibleItems = (type) => { const t = today(); return S.items.filter((i) => i.owner === S.me && i.type === type && (!i.done || i.doneDay === t)).sort((a, b) => (a.done - b.done) || ((a.createdAt || 0) - (b.createdAt || 0))); };
+function itemRows(list) {
+  if (!list.length) return '<div class="empty">Ancora niente qui.</div>';
+  return `<ul class="list">${list.map((x) => `<li class="${x.done ? 'done' : ''}"><label><input type="checkbox" data-a="item-toggle" data-id="${x.id}" ${x.done ? 'checked' : ''}><span class="txt">${esc(x.text)}</span></label><button class="ghost-btn" data-a="item-del" data-id="${x.id}" aria-label="Elimina">${svg(IC.x, 16)}</button></li>`).join('')}</ul>`;
+}
+function listSection(key, icon, title, type) {
+  const list = visibleItems(type), open = list.filter((x) => !x.done).length;
+  return section(key, icon, title, open + (open === 1 ? ' aperta' : ' aperte'), () => itemRows(list)
+    + `<div class="tiny muted" style="margin-top:8px">Le cose spuntate restano qui fino a stasera, poi passano in Cose fatte.</div>`
+    + `<form class="add" data-f="item-add" data-type="${type}"><input id="in-${type}" placeholder="Aggiungi…" aria-label="Aggiungi a ${title}" autocomplete="off"><button>Aggiungi</button></form>`);
+}
+function wishSection() {
+  const c = visibleItems('wishCose'), e = visibleItems('wishEsp');
+  return section('wish', IC.gift, 'Wishlist', `${c.filter((x) => !x.done).length} cose · ${e.filter((x) => !x.done).length} esperienze`, () => {
+    const list = S.wTab === 'wishCose' ? c : e;
+    return `<div class="seg" role="group" aria-label="Tipo"><button data-a="wtab" data-v="wishCose" aria-pressed="${S.wTab === 'wishCose'}">Cose</button><button data-a="wtab" data-v="wishEsp" aria-pressed="${S.wTab === 'wishEsp'}">Esperienze</button></div>`
+      + `<div style="margin-top:6px">${itemRows(list)}</div>`
+      + `<form class="add" data-f="item-add" data-type="${S.wTab}"><input id="in-${S.wTab}" placeholder="${S.wTab === 'wishCose' ? 'Una cosa che vorresti…' : 'Un’esperienza da fare…'}" aria-label="Aggiungi alla wishlist" autocomplete="off"><button>Aggiungi</button></form>`;
+  });
+}
+const placeAvg = (p) => { const v = Object.values(p.votes || {}).filter((x) => x > 0); return v.length ? { avg: Math.round(sum(v) / v.length * 2) / 2, n: v.length } : null; };
+const placeMaps = (p) => p.maps || mapsUrl(p.name + ' ' + (p.zone || '') + ' Roma');
+function foodSection() {
+  const vis = S.places.filter((p) => p.visited).length, todo = S.places.length - vis;
+  return section('mangiare', IC.food, 'Mangiare', `${vis} visitati · ${todo} da provare`, () => {
+    const inCat = S.places.filter((p) => p.cat === S.fTab), v = inCat.filter((p) => p.visited), d = inCat.filter((p) => !p.visited);
+    const list = (S.fMode === 'visitati' ? v : d).sort((a, b) => ((placeAvg(b) || { avg: 0 }).avg - (placeAvg(a) || { avg: 0 }).avg) || a.name.localeCompare(b.name));
+    return `<div class="seg" role="group" aria-label="Categoria">${CATS.map(([k, l]) => `<button data-a="ftab" data-v="${k}" aria-pressed="${S.fTab === k}">${l}</button>`).join('')}</div>
+      <div class="under" role="group" aria-label="Stato"><button data-a="fmode" data-v="visitati" aria-pressed="${S.fMode === 'visitati'}">Visitati · ${v.length}</button><button data-a="fmode" data-v="davisitare" aria-pressed="${S.fMode === 'davisitare'}">Da visitare · ${d.length}</button></div>
+      <div class="stack" style="margin-top:8px">${list.length ? list.map((p) => { const a = placeAvg(p); return `<div style="display:flex;gap:8px;align-items:center"><button class="place" data-a="place-open" data-id="${p.id}"><div style="flex:1;min-width:0"><div class="nm">${esc(p.name)}</div><div class="zn">${svg(IC.pin, 13)}${esc(p.zone || '—')}</div>${p.visited ? (a ? `<div class="stars">${stars(a.avg)}<span style="font-size:12px;font-weight:800;margin-left:5px">${String(a.avg).replace('.', ',')}</span><span class="tiny muted" style="margin-left:3px">· ${a.n} ${a.n === 1 ? 'voto' : 'voti'}</span></div>` : '<div class="tiny muted" style="margin-top:5px">Nessun voto: tocca per votare</div>') : '<div class="tiny" style="font-weight:700;color:#7A4A00;margin-top:5px">Da provare</div>'}</div></button><a class="maps" href="${esc(placeMaps(p))}" target="_blank" rel="noopener">${svg(IC.map, 15)}Maps</a></div>`; }).join('') : '<div class="empty">Ancora nessun posto qui.</div>'}</div>
+      <button class="dashed" data-a="place-new">+ Aggiungi posto</button>`;
+  });
+}
+function doneSection() {
+  const t = today(), list = S.items.filter((i) => i.owner === S.me && i.done && i.doneDay && i.doneDay < t).sort((a, b) => b.doneDay.localeCompare(a.doneDay));
+  const wk = weekOf(t), thisWeek = list.filter((i) => i.doneDay >= wk).length;
+  return section('fatte', IC.done, 'Cose fatte', thisWeek + ' questa settimana', () => {
+    if (!list.length) return '<div class="empty">Qui finiscono le cose spuntate, dal giorno dopo.</div>';
+    const groups = []; list.slice(0, 80).forEach((i) => { const g = groups[groups.length - 1]; if (g && g.day === i.doneDay) g.items.push(i); else groups.push({ day: i.doneDay, items: [i] }); });
+    const y = ymd(addDays(new Date(), -1));
+    return groups.map((g) => `<div class="lbl" style="margin:12px 0 4px">${g.day === y ? 'Ieri · ' : ''}${longDate(g.day)}</div>${g.items.map((i) => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--soft)"><span style="flex:1;font-size:14px">${esc(i.text)}</span><span class="tag">${TYPES[i.type]}</span><button class="ghost-btn" data-a="item-restore" data-id="${i.id}" aria-label="Rimetti tra le cose da fare">${svg(IC.undo, 16)}</button></div>`).join('')}`).join('');
+  });
+}
+
+// ---------- calendario ----------
+function legend() {
+  const o = other();
+  return `<div class="legend"><span><span class="dot" style="background:${colorOf(S.me)}"></span>${esc(nameOf(S.me))}</span>${o ? `<span><span class="dot" style="background:${colorOf(o.id)}"></span>${esc(o.name)}</span>` : ''}<span><span class="dot" style="background:${INS}"></span>Insieme</span><span><span class="dot" style="background:${IMP}"></span>Importante</span></div>`;
+}
+function evButton(o, cls) {
+  const ev = o.ev, tag = evTag(ev, true);
+  return `<button class="${cls}" style="${pv(evColor(ev))}" data-a="ev-open" data-id="${ev.id}" data-d="${o.date}"><span class="dot" style="background:var(--c);width:8px;height:8px"></span><span class="t">${ev.time || 'tutto'}</span><span class="x">${esc(ev.title)}${tag && !ev.important && ev.owner !== 'both' ? `<span class="f">${esc(tag)}</span>` : ''}</span>${ev.repeat !== 'none' ? `<span style="color:var(--d)" title="Si ripete">${svg(IC.rep, 15)}</span>` : ''}</button>`;
+}
+function calendarView() {
+  const a = parse(S.anchor);
+  let nav, body;
+  if (S.cal === 'week') {
+    const m = monday(a), e = addDays(m, 6), occ = occurrences(ymd(m), ymd(e)), t = today();
+    nav = m.getMonth() === e.getMonth() ? `${m.getDate()} – ${e.getDate()} ${MESI[e.getMonth()]}` : `${m.getDate()} ${MESI[m.getMonth()].slice(0, 3)} – ${e.getDate()} ${MESI[e.getMonth()].slice(0, 3)}`;
+    body = `<div class="days">${Array.from({ length: 7 }, (_, i) => { const d = ymd(addDays(m, i)), list = occ.filter((o) => o.date === d); return `<div class="day ${d === t ? 'today' : ''}"><div class="day-l"><span>${GG[i]}</span><span>${addDays(m, i).getDate()}</span></div><div class="day-e">${list.length ? list.map((o) => evButton(o, 'ev')).join('') : '<div class="free">Libero</div>'}</div></div>`; }).join('')}</div>`;
+  } else {
+    const first = new Date(a.getFullYear(), a.getMonth(), 1), start = monday(first), end = addDays(start, 41), occ = occurrences(ymd(start), ymd(end)), t = today();
+    nav = cap(MESI[a.getMonth()]) + ' ' + a.getFullYear();
+    const cells = Array.from({ length: 42 }, (_, i) => {
+      const dd = addDays(start, i), d = ymd(dd), list = occ.filter((o) => o.date === d), out = dd.getMonth() !== a.getMonth();
+      return `<button class="cell ${out ? 'out' : ''} ${d === S.selDay ? 'sel' : ''} ${d === t ? 'today' : ''}" data-a="day-sel" data-d="${d}" aria-label="${longDate(d)}, ${list.length} impegni" aria-pressed="${d === S.selDay}"><span class="n">${dd.getDate()}</span>${list.slice(0, 3).map((o) => `<span class="b" style="background:${evColor(o.ev)}">${esc(o.ev.title)}</span>`).join('')}${list.length > 3 ? `<span class="more">+${list.length - 3}</span>` : ''}</button>`;
+    }).join('');
+    const sel = occurrences(S.selDay, S.selDay);
+    body = `<div class="mhead">${['L','M','M','G','V','S','D'].map((x) => `<span>${x}</span>`).join('')}</div><div class="mgrid">${cells}</div>
+      <div style="margin:16px 20px 0"><div style="font-weight:800;font-size:16px">${longDate(S.selDay)}</div><div class="stack" style="margin-top:8px">${sel.length ? sel.map((o) => evButton(o, 'ev')).join('') : '<div class="free">Niente in programma.</div>'}</div></div>`;
+  }
+  return `<header class="ch"><h1>Calendario</h1><button class="pillbtn" data-a="cal-today">Oggi</button></header>
+    <div class="cseg" role="group" aria-label="Vista"><button data-a="cal-mode" data-v="week" aria-pressed="${S.cal === 'week'}">Settimana</button><button data-a="cal-mode" data-v="month" aria-pressed="${S.cal === 'month'}">Mese</button></div>
+    <div class="cnav"><button data-a="cal-move" data-v="-1" aria-label="Precedente">${svg(IC.left)}</button><div>${nav}</div><button data-a="cal-move" data-v="1" aria-label="Successivo">${svg(IC.right)}</button></div>
+    ${legend()}${body}`;
+}
+
+function loginView() {
+  return `<form class="login" data-f="login"><img src="icon-192.png" alt="" width="96" height="96" style="border-radius:24px"><h1>Girasoli</h1><div class="muted" style="font-size:15px;line-height:1.5">Entra con l’email e la password del vostro account.</div>
+    <label class="fld">Email<input id="lg-email" type="email" autocomplete="username" required></label>
+    <label class="fld">Password<input id="lg-pw" type="password" autocomplete="current-password" required></label>
+    <div class="err" id="lg-err"></div><button class="btn">Entra</button></form>`;
+}
+
+// ================== FOGLI ==================
+function openSheet(html, opts = {}) {
+  S.sheet = opts;
+  $sheet.innerHTML = `<div class="scrim" data-a="${opts.locked ? '' : 'scrim'}"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(opts.label || '')}"><div class="handle"></div>${html}</div></div>`;
+  document.body.style.overflow = 'hidden';
+  if (opts.mount) opts.mount($sheet);
+}
+function closeSheet() { S.sheet = null; $sheet.innerHTML = ''; document.body.style.overflow = ''; if (S.loaded && !me()) openProfile(true); }
+const closeBtn = () => `<button class="close" data-a="close" aria-label="Chiudi">${svg(IC.x, 18)}</button>`;
+const pressed = (g) => { const b = $sheet.querySelector(`[data-g="${g}"][aria-pressed="true"]`); return b ? b.dataset.v : null; };
+
+function openEvent(id, date) {
+  const ev = S.events.find((e) => e.id === id); if (!ev) return;
+  const c = evColor(ev), place = ev.place || '', url = ev.maps || (place ? mapsUrl(place) : '');
+  const rec = ev.repeat !== 'none';
+  openSheet(`<div class="sh-top"><div><span class="chiptag" style="${pv(c)}"><span class="dot" style="background:${c};width:8px;height:8px"></span>${esc(evTag(ev, false))}</span><h2 style="font-size:26px;margin-top:8px">${esc(ev.title)}</h2></div>${closeBtn()}</div>
+    <div class="info">${svg(IC.clock)}<div><b>${longDate(date)}</b><div class="muted">${ev.time ? ev.time + (ev.end ? ' – ' + ev.end : '') : 'Tutto il giorno'} · ${REP[ev.repeat] || 'Una volta'}</div></div></div>
+    ${place || ev.maps ? `<div class="info" style="align-items:center">${svg(IC.pin)}<div style="flex:1"><b>${esc(place || 'Posizione')}</b></div><a class="maps" href="${esc(url)}" target="_blank" rel="noopener">${svg(IC.map, 15)}Apri in Maps</a></div>` : ''}
+    <div class="info">${svg(IC.text)}<div>${ev.desc ? esc(ev.desc).replace(/\n/g, '<br>') : '<span class="muted">Nessuna descrizione.</span>'}</div></div>
+    <div class="small muted">Aggiunto da ${esc(nameOf(ev.createdBy))}</div>
+    <div class="btns"><button class="btn" data-a="ev-edit" data-id="${ev.id}">Modifica</button>${rec ? '' : `<button class="btn red" data-a="ev-del" data-id="${ev.id}">Elimina</button>`}</div>
+    ${rec ? `<div class="btns"><button class="btn red" data-a="ev-skip" data-id="${ev.id}" data-d="${date}">Elimina solo questa volta</button><button class="btn red" data-a="ev-del" data-id="${ev.id}">Elimina tutte</button></div>` : ''}`, { label: 'Dettagli impegno' });
+}
+
+function openEventForm(id, date) {
+  const ev = id ? S.events.find((e) => e.id === id) : null, o = other();
+  const f = ev || { title:'', date: date || (S.tab === 'calendario' && S.cal === 'month' ? S.selDay : today()), time:'', end:'', repeat:'none', owner: S.me, important:false, place:'', maps:'', desc:'' };
+  const who = f.owner === 'both' ? 'both' : f.owner === S.me ? 'me' : 'other';
+  const whoBtn = (v, l, c, dis) => `<button type="button" class="chip" data-a="choose" data-g="who" data-v="${v}" aria-pressed="${who === v}" style="--cc:${c};--cs:${soft(c)}" ${dis ? 'disabled' : ''}><span class="dot" style="background:${c}"></span>${esc(l)}</button>`;
+  openSheet(`<form data-f="ev-save" data-id="${ev ? ev.id : ''}" style="display:flex;flex-direction:column;gap:14px"><div class="sh-top"><h2>${ev ? 'Modifica impegno' : 'Nuovo impegno'}</h2>${closeBtn()}</div>
+    <label class="fld">Cosa<input id="f-title" value="${esc(f.title)}" placeholder="Es. Cena da mamma" required autocomplete="off"></label>
+    <label class="fld">Giorno<input id="f-date" type="date" value="${f.date}" required></label>
+    <div class="row"><label class="fld">Dalle<input id="f-time" type="time" value="${f.time || ''}"></label><label class="fld">Alle<input id="f-end" type="time" value="${f.end || ''}"></label></div>
+    <div class="fld">Ripeti<div class="chips">${Object.entries(REP).map(([k, l]) => `<button type="button" class="chip" data-a="choose" data-g="rep" data-v="${k}" aria-pressed="${f.repeat === k}">${l}</button>`).join('')}</div></div>
+    <div class="fld">Per chi<div class="chips">${whoBtn('me', 'Per me', colorOf(S.me))}${whoBtn('other', o ? 'Per ' + o.name : 'Per l’altra persona', o ? colorOf(o.id) : NEUTRO, !o)}${whoBtn('both', 'Insieme', INS)}</div></div>
+    <label class="impbox"><span><span style="display:block;font-weight:800;font-size:14px;color:var(--imp)">Importante</span><span class="small muted">Diventa rosso per tutti e due</span></span><input id="f-imp" type="checkbox" role="switch" data-a="ev-preview" ${f.important ? 'checked' : ''}></label>
+    <label class="fld">Luogo<input id="f-place" value="${esc(f.place)}" placeholder="Es. Cinema Barberini" autocomplete="off"></label>
+    <label class="fld">Link Google Maps (facoltativo)<input id="f-maps" type="url" value="${esc(f.maps)}" placeholder="Incolla il link del posto"></label>
+    <label class="fld">Descrizione<textarea id="f-desc" rows="3" placeholder="Note, cosa portare…">${esc(f.desc)}</textarea></label>
+    <button class="btn" id="f-save"><span class="dot" id="f-dot"></span><span id="f-lbl">Salva</span></button></form>`, { label: ev ? 'Modifica impegno' : 'Nuovo impegno', mount: evPreview });
+}
+function evPreview() {
+  const imp = $sheet.querySelector('#f-imp'); if (!imp) return;
+  const w = pressed('who'), o = other();
+  const c = imp.checked ? IMP : w === 'both' ? INS : w === 'other' && o ? colorOf(o.id) : colorOf(S.me);
+  const l = imp.checked ? 'rosso, importante' : w === 'both' ? 'blu, insieme' : w === 'other' && o ? 'colore di ' + o.name : 'il tuo colore';
+  $sheet.querySelector('#f-dot').style.background = c; $sheet.querySelector('#f-dot').style.border = '2px solid #fff';
+  $sheet.querySelector('#f-lbl').textContent = 'Salva · ' + l;
+}
+
+function openProfile(setup) {
+  const u = me() || { id: S.me, name: '', color: '', photo: '' }, o = other();
+  let photo = u.photo || '';
+  const free = COLORS.find((c) => !o || o.color !== c.k);
+  const cur = u.color || (free ? free.k : 'oliva');
+  openSheet(`<form data-f="profile-save" style="display:flex;flex-direction:column;gap:16px"><div class="sh-top"><h2>${setup ? 'Crea il tuo profilo' : 'Il tuo profilo'}</h2>${setup ? '' : closeBtn()}</div>
+    ${setup ? '<div class="muted" style="font-size:14px;line-height:1.5">Scegli il nome, una foto e il colore che segnerà le tue cose.</div>' : ''}
+    <div class="photo-row"><div id="p-av">${avatar({ ...u, photo, color: cur }, 72)}</div><div style="display:flex;flex-direction:column;gap:6px"><label class="filebtn">Scegli foto<input id="p-photo" type="file" accept="image/*"></label>${photo ? '<button type="button" class="link-btn" style="padding:0;min-height:30px" data-a="photo-clear">Togli foto</button>' : ''}</div></div>
+    <label class="fld">Nome<input id="p-name" value="${esc(u.name)}" required autocomplete="off" placeholder="Come ti chiami?"></label>
+    <div class="fld">Il tuo colore<div class="colors">${COLORS.map((c) => { const taken = o && o.color === c.k; return `<button type="button" data-a="choose" data-g="color" data-v="${c.k}" aria-pressed="${cur === c.k}" ${taken ? 'disabled' : ''}><span class="dot" style="background:${c.c};width:18px;height:18px"></span><span>${c.n}${taken ? `<span class="tiny muted" style="display:block">di ${esc(o.name)}</span>` : ''}</span></button>`; }).join('')}</div><span class="tiny muted" style="font-weight:500">Rosso e blu sono riservati a importante e insieme.</span></div>
+    <button class="btn">Salva</button>${!setup && S.mode === 'firebase' ? '<button type="button" class="btn light" data-a="logout">Esci</button>' : ''}</form>`, {
+    label: 'Profilo', locked: setup,
+    mount: (root) => {
+      S.sheet.photo = photo;
+      root.querySelector('#p-photo').addEventListener('change', async (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        try { S.sheet.photo = await compress(file); refreshAv(); } catch (err) { toast('Non riesco a leggere questa foto.'); }
+      });
+    }
+  });
+}
+function refreshAv() {
+  const u = me() || { id: S.me, name: '' }, k = pressed('color') || u.color;
+  const name = ($sheet.querySelector('#p-name') || {}).value || u.name;
+  const tmp = { ...u, id: '__tmp', name, photo: S.sheet.photo };
+  S.users.__tmp = { ...tmp, color: k };
+  $sheet.querySelector('#p-av').innerHTML = avatar(tmp, 72);
+  delete S.users.__tmp;
+}
+function compress(file) {
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = 320, r = Math.max(img.width, img.height) / s, w = Math.round(img.width / Math.max(r, 1)), h = Math.round(img.height / Math.max(r, 1));
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url); res(cv.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = rej; img.src = url;
+  });
+}
+
+function openPlace(id) {
+  const p = id ? S.places.find((x) => x.id === id) : null;
+  if (p && !S.sheet?.edit) {
+    const a = placeAvg(p), mine = (p.votes || {})[S.me] || 0, o = other(), theirs = o ? (p.votes || {})[o.id] : 0;
+    openSheet(`<div class="sh-top"><div><span class="chiptag" style="${pv(colorOf(S.me))}">${CATS.find((c) => c[0] === p.cat)[1]}</span><h2 style="font-size:24px;margin-top:8px">${esc(p.name)}</h2><div class="small muted" style="margin-top:2px">${esc(p.zone || '')}</div></div>${closeBtn()}</div>
+      <a class="btn light" href="${esc(placeMaps(p))}" target="_blank" rel="noopener">${svg(IC.map, 18)}Apri in Google Maps</a>
+      ${p.visited ? `<div class="fld">Il tuo voto<div class="bigstars">${[1, 2, 3, 4, 5].map((i) => `<button data-a="place-vote" data-id="${p.id}" data-v="${i}" aria-label="${i} stelle" aria-pressed="${mine === i}"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="${STAR}" fill="${mine >= i ? '#E39A2D' : '#EADDD2'}"/></svg></button>`).join('')}</div></div>
+        <div class="small muted">${a ? `Media ${String(a.avg).replace('.', ',')} su ${a.n} ${a.n === 1 ? 'voto' : 'voti'}` : 'Ancora nessun voto'}${o ? ` · ${esc(o.name)}: ${theirs ? theirs + ' stelle' : 'non ha votato'}` : ''}</div>` : '<div class="muted" style="font-size:14px">Quando ci andate, segnatelo come visitato e potrete votarlo.</div>'}
+      <button class="btn" data-a="place-visit" data-id="${p.id}">${p.visited ? 'Sposta in da visitare' : 'Ci siamo stati: segna come visitato'}</button>
+      <div class="btns"><button class="btn light" data-a="place-edit" data-id="${p.id}">Modifica</button><button class="btn red" data-a="place-del" data-id="${p.id}">Elimina</button></div>`, { label: 'Posto' });
+    return;
+  }
+  const f = p || { cat: S.fTab, name: '', zone: '', maps: '', visited: S.fMode === 'visitati' };
+  openSheet(`<form data-f="place-save" data-id="${p ? p.id : ''}" style="display:flex;flex-direction:column;gap:14px"><div class="sh-top"><h2>${p ? 'Modifica posto' : 'Nuovo posto'}</h2>${closeBtn()}</div>
+    <div class="fld">Tipo<div class="chips">${CATS.map(([k, l]) => `<button type="button" class="chip" data-a="choose" data-g="cat" data-v="${k}" aria-pressed="${f.cat === k}">${l}</button>`).join('')}</div></div>
+    <label class="fld">Nome<input id="pl-name" value="${esc(f.name)}" required autocomplete="off" placeholder="Es. Da Enzo al 29"></label>
+    <label class="fld">Zona<input id="pl-zone" value="${esc(f.zone)}" autocomplete="off" placeholder="Es. Trastevere"></label>
+    <label class="fld">Link Google Maps (facoltativo)<input id="pl-maps" type="url" value="${esc(f.maps)}" placeholder="Se lo lasci vuoto lo cerco con nome e zona"></label>
+    <div class="fld">Stato<div class="chips"><button type="button" class="chip" data-a="choose" data-g="vis" data-v="1" aria-pressed="${!!f.visited}">Visitato</button><button type="button" class="chip" data-a="choose" data-g="vis" data-v="0" aria-pressed="${!f.visited}">Da visitare</button></div></div>
+    <button class="btn">Salva</button></form>`, { label: 'Posto', edit: true });
+}
+
+// ================== AZIONI ==================
+let toastT;
+function toast(msg) { let t = document.querySelector('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); } t.textContent = msg; clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 3500); }
+
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-a]'); if (!el) return;
+  const a = el.dataset.a, id = el.dataset.id, v = el.dataset.v;
+  if (a === 'scrim' && e.target !== el) return;
+  if (el.tagName === 'INPUT') return;
+  switch (a) {
+    case 'tab': S.tab = v; render(); window.scrollTo(0, 0); break;
+    case 'sec': S.open[el.dataset.k] = !S.open[el.dataset.k]; saveOpen(); render(); break;
+    case 'wtab': S.wTab = v; render(); break;
+    case 'ftab': S.fTab = v; render(); break;
+    case 'fmode': S.fMode = v; render(); break;
+    case 'demo-user': S.me = v; localStorage.setItem('vq-demo-me', v); render(); break;
+    case 'demo-reset': if (confirm('Cancello i dati di prova e ricomincio?')) { localStorage.removeItem(LocalDB.key); location.reload(); } break;
+    case 'item-del': run(DB.remove('items', id)); break;
+    case 'item-restore': run(DB.update('items', id, { done: false, doneDay: '' })); break;
+    case 'goal-del': run(DB.remove('goals', id)); break;
+    case 'goal-copy': { const wk = weekOf(today()), last = ymd(addDays(parse(wk), -7)); S.goals.filter((g) => g.owner === S.me && g.week === last).forEach((g, i) => run(DB.add('goals', { owner: S.me, week: wk, text: g.text, mult: g.mult, done: false, createdAt: Date.now() + i }))); break; }
+    case 'cal-mode': S.cal = v; if (v === 'month') S.selDay = S.anchor; render(); break;
+    case 'cal-today': S.anchor = today(); S.selDay = today(); render(); break;
+    case 'cal-move': { const d = parse(S.anchor), n = Number(v); S.anchor = ymd(S.cal === 'week' ? addDays(d, 7 * n) : new Date(d.getFullYear(), d.getMonth() + n, 1)); if (S.cal === 'month') S.selDay = S.anchor; render(); break; }
+    case 'day-sel': S.selDay = el.dataset.d; S.anchor = el.dataset.d; render(); break;
+    case 'ev-open': openEvent(id, el.dataset.d); break;
+    case 'ev-new': openEventForm(null); break;
+    case 'ev-edit': openEventForm(id); break;
+    case 'ev-del': if (confirm('Elimino questo impegno?')) { run(DB.remove('events', id)); closeSheet(); } break;
+    case 'ev-skip': { const ev = S.events.find((x) => x.id === id); run(DB.update('events', id, { skip: [...(ev.skip || []), el.dataset.d] })); closeSheet(); break; }
+    case 'choose': { if (el.disabled) break; $sheet.querySelectorAll(`[data-g="${el.dataset.g}"]`).forEach((b) => b.setAttribute('aria-pressed', String(b === el))); if (el.dataset.g === 'who') evPreview(); if (el.dataset.g === 'color') refreshAv(); break; }
+    case 'profile-edit': openProfile(false); break;
+    case 'photo-clear': S.sheet.photo = ''; refreshAv(); el.remove(); break;
+    case 'logout': closeSheet(); FireDB.logout(); break;
+    case 'place-new': openPlace(null); break;
+    case 'place-open': openPlace(id); break;
+    case 'place-edit': S.sheet = { edit: true }; openPlace(id); break;
+    case 'place-vote': { const p = S.places.find((x) => x.id === id), cur = (p.votes || {})[S.me]; const val = cur === Number(v) ? 0 : Number(v); run(DB.update('places', id, { votes: { ...(p.votes || {}), [S.me]: val } })); setTimeout(() => openPlace(id), 60); break; }
+    case 'place-visit': { const p = S.places.find((x) => x.id === id); run(DB.update('places', id, { visited: !p.visited })); setTimeout(() => openPlace(id), 60); break; }
+    case 'place-del': if (confirm('Elimino questo posto?')) { run(DB.remove('places', id)); closeSheet(); } break;
+    case 'close': case 'scrim': closeSheet(); break;
+  }
+});
+
+document.addEventListener('change', (e) => {
+  const el = e.target, a = el.dataset && el.dataset.a; if (!a) return;
+  if (a === 'item-toggle') run(DB.update('items', el.dataset.id, { done: el.checked, doneDay: el.checked ? today() : '' }));
+  if (a === 'goal-toggle') run(DB.update('goals', el.dataset.id, { done: el.checked }));
+  if (a === 'ev-preview') evPreview();
+});
+document.addEventListener('input', (e) => { if (e.target.id === 'p-name') refreshAv(); });
+
+document.addEventListener('submit', async (e) => {
+  const f = e.target, k = f.dataset.f; if (!k) return;
+  e.preventDefault();
+  const val = (s) => (f.querySelector(s) || {}).value?.trim() || '';
+  if (k === 'item-add') { const t = val('input'); if (!t) return; f.querySelector('input').value = ''; run(DB.add('items', { owner: S.me, type: f.dataset.type, text: t, done: false, doneDay: '', createdAt: Date.now() })); setTimeout(() => { const i = document.getElementById(f.querySelector('input').id); if (i) i.focus(); }, 30); }
+  if (k === 'goal-add') { const t = val('#in-goal'); if (!t) return; run(DB.add('goals', { owner: S.me, week: weekOf(today()), text: t, mult: Number(val('#in-mult')) || 1, done: false, createdAt: Date.now() })); const i = document.getElementById('in-goal'); if (i) i.value = ''; }
+  if (k === 'ev-save') {
+    const w = pressed('who'), o = other(), id = f.dataset.id;
+    const data = { title: val('#f-title'), date: val('#f-date'), time: val('#f-time'), end: val('#f-end'), repeat: pressed('rep') || 'none', owner: w === 'both' ? 'both' : w === 'other' && o ? o.id : S.me, important: f.querySelector('#f-imp').checked, place: val('#f-place'), maps: val('#f-maps'), desc: val('#f-desc') };
+    if (!data.title || !data.date) return;
+    if (id) run(DB.update('events', id, data)); else run(DB.add('events', { ...data, createdBy: S.me, createdAt: Date.now() }));
+    closeSheet(); if (S.cal === 'month') S.selDay = data.date; S.anchor = data.date; render();
+  }
+  if (k === 'profile-save') {
+    const name = val('#p-name'); if (!name) return;
+    run(DB.put('users', S.me, { name, color: pressed('color') || 'oliva', photo: S.sheet.photo || '', email: S.mode === 'firebase' && FireDB.auth.currentUser ? FireDB.auth.currentUser.email : '' }));
+    S.sheet = null; $sheet.innerHTML = ''; document.body.style.overflow = '';
+  }
+  if (k === 'place-save') {
+    const id = f.dataset.id, data = { cat: pressed('cat') || 'ristoranti', name: val('#pl-name'), zone: val('#pl-zone'), maps: val('#pl-maps'), visited: pressed('vis') === '1' };
+    if (!data.name) return;
+    if (id) run(DB.update('places', id, data)); else run(DB.add('places', { ...data, votes: {}, createdBy: S.me, createdAt: Date.now() }));
+    S.fTab = data.cat; S.fMode = data.visited ? 'visitati' : 'davisitare'; closeSheet(); render();
+  }
+  if (k === 'login') {
+    const err = document.getElementById('lg-err'); err.textContent = '';
+    try { await FireDB.login(val('#lg-email'), document.getElementById('lg-pw').value); }
+    catch (x) { err.textContent = /invalid|wrong|not-found|credential/.test(x.code || '') ? 'Email o password sbagliate.' : 'Accesso non riuscito: ' + (x.code || x.message); }
+  }
+});
+
+// a mezzanotte (o quando si riapre l'app) aggiorna "oggi"
+let lastDay = today();
+setInterval(() => { if (today() !== lastDay) { lastDay = today(); render(); } }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && today() !== lastDay) { lastDay = today(); render(); } });
+
+// ================== AVVIO ==================
+if (S.mode === 'firebase') { FireDB.start(onData).then(render).catch((e) => { $app.innerHTML = '<div class="loading">Non riesco a collegarmi al database.<br><span class="small">' + esc(e.message) + '</span></div>'; }); }
+else LocalDB.start(onData);
+</script>
+</body>
+</html>
