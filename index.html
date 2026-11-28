@@ -222,7 +222,7 @@ const COLORS = [
 ];
 const IMP = '#C93A2E', INS = '#2A5CC9', NEUTRO = '#8A7B71';
 const MULT = { 1:'Facile', 2:'Media', 3:'Difficile' };
-const TYPES = { todo:'Da fare', long:'Lungo termine', wishCose:'Wishlist cose', wishEsp:'Wishlist esperienze' };
+const TYPES = { todo:'Da fare · breve', long:'Da fare · lungo', wishCose:'Wishlist cose', wishEsp:'Wishlist esperienze' };
 const CATS = [['colazione','Colazione'],['ristoranti','Ristoranti'],['gelaterie','Gelaterie']];
 const GIORNI = ['lunedì','martedì','mercoledì','giovedì','venerdì','sabato','domenica'];
 const GG = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
@@ -280,7 +280,7 @@ const S = {
   users: {}, events: [], items: [], goals: [], places: [],
   tab: 'profilo', cal: 'week', anchor: today(), selDay: today(),
   open: { obiettivi:true, dafare:true, lungo:false, wish:false, mangiare:false, fatte:false },
-  wTab: 'wishCose', fTab: 'ristoranti', fMode: 'visitati', sheet: null
+  wTab: 'wishCose', dTab: 'todo', fTab: 'ristoranti', fMode: 'visitati', sheet: null
 };
 try { Object.assign(S.open, JSON.parse(localStorage.getItem('vq-open') || '{}')); } catch (e) {}
 const saveOpen = () => { try { localStorage.setItem('vq-open', JSON.stringify(S.open)); } catch (e) {} };
@@ -458,7 +458,7 @@ function profileView() {
   const col = COLORS.find((x) => x.k === u.color);
   const demo = S.mode === 'demo' ? `<div class="demo"><b>Modalità prova.</b> I dati restano solo su questo dispositivo finché non colleghiamo il database. Prova come:<br>${Object.values(S.users).map((x) => `<button data-a="demo-user" data-v="${x.id}" aria-pressed="${x.id === S.me}">${esc(x.name)}</button>`).join('')}<button data-a="demo-reset">Ricomincia la prova</button></div>` : '';
   return demo + `<header class="ph">${avatar(u)}<div style="flex:1;min-width:0"><div class="small muted">Ciao,</div><div class="ph-name">${esc(u.name)}</div><div class="ph-col"><span class="dot" style="background:${colorOf(u.id)}"></span>Il tuo colore: ${col ? col.n : '—'}</div></div><button class="icon-btn" data-a="profile-edit" aria-label="Modifica nome, foto e colore">${svg(IC.pencil)}</button></header>`
-    + reminderView() + goalsSection() + listSection('dafare', IC.check, 'Da fare', 'todo') + listSection('lungo', IC.flag, 'Da fare · lungo termine', 'long') + wishSection() + foodSection() + doneSection();
+    + reminderView() + goalsSection() + todoSection() + wishSection() + foodSection() + doneSection();
 }
 
 function reminderView() {
@@ -524,11 +524,15 @@ function itemRows(list, showWho) {
   if (!list.length) return '<div class="empty">Ancora niente qui.</div>';
   return `<ul class="list">${list.map((x) => `<li class="${x.done ? 'done' : ''}"><label><input type="checkbox" data-a="item-toggle" data-id="${x.id}" ${x.done ? 'checked' : ''}><span class="txt">${esc(x.text)}</span></label>${showWho ? `<span class="who" style="${pv(colorOf(x.owner))}"><span class="dot" style="background:var(--c);width:8px;height:8px"></span>${esc(nameOf(x.owner))}</span>` : ''}${x.owner === S.me ? `<button class="ghost-btn" data-a="item-del" data-id="${x.id}" aria-label="Elimina">${svg(IC.x, 16)}</button>` : '<span style="width:36px;flex:none"></span>'}</li>`).join('')}</ul>`;
 }
-function listSection(key, icon, title, type) {
-  const list = visibleItems(type), open = list.filter((x) => !x.done).length;
-  return section(key, icon, title, open + (open === 1 ? ' aperta' : ' aperte'), () => itemRows(list)
-    + `<div class="tiny muted" style="margin-top:8px">Le cose spuntate restano qui fino a stasera, poi passano in Cose fatte.</div>`
-    + `<form class="add" data-f="item-add" data-type="${type}"><input id="in-${type}" placeholder="Aggiungi…" aria-label="Aggiungi a ${title}" autocomplete="off"><button>Aggiungi</button></form>`);
+function todoSection() {
+  const b = visibleItems('todo'), l = visibleItems('long'), open = (x) => x.filter((i) => !i.done).length;
+  return section('dafare', IC.check, 'Da fare', `${open(b)} breve · ${open(l)} lungo`, () => {
+    const type = S.dTab, list = type === 'todo' ? b : l;
+    return `<div class="seg" role="group" aria-label="Termine"><button data-a="dtab" data-v="todo" aria-pressed="${type === 'todo'}">Breve termine</button><button data-a="dtab" data-v="long" aria-pressed="${type === 'long'}">Lungo termine</button></div>`
+      + `<div style="margin-top:6px">${itemRows(list)}</div>`
+      + `<div class="tiny muted" style="margin-top:8px">Le cose spuntate restano qui fino a stasera, poi passano in Cose fatte.</div>`
+      + `<form class="add" data-f="item-add" data-type="${type}"><input id="in-${type}" placeholder="${type === 'todo' ? 'Da fare a breve…' : 'Da fare con calma…'}" aria-label="Aggiungi a Da fare" autocomplete="off"><button>Aggiungi</button></form>`;
+  });
 }
 function wishSection() {
   const c = visibleItems('wishCose'), e = visibleItems('wishEsp');
@@ -735,6 +739,7 @@ document.addEventListener('click', (e) => {
     case 'tab': S.tab = v; render(); window.scrollTo(0, 0); break;
     case 'sec': S.open[el.dataset.k] = !S.open[el.dataset.k]; saveOpen(); render(); break;
     case 'wtab': S.wTab = v; render(); break;
+    case 'dtab': S.dTab = v; render(); break;
     case 'ftab': S.fTab = v; render(); break;
     case 'fmode': S.fMode = v; render(); break;
     case 'demo-user': S.me = v; localStorage.setItem('vq-demo-me', v); render(); break;
