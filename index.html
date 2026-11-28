@@ -160,7 +160,25 @@ ul.list .done .txt{text-decoration:line-through;color:var(--muted)}
 .info svg{flex:none;color:var(--muted)}
 .chiptag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:800;background:var(--s);color:var(--d)}
 .bigstars{display:flex;gap:6px}
-.bigstars button{width:48px;height:48px;border:0;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.bigstar{position:relative;width:52px;height:52px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.bigstar button{position:absolute;top:0;bottom:0;width:50%;border:0;background:none;padding:0;border-radius:12px}
+.bigstar button:first-of-type{left:0}.bigstar button:last-of-type{right:0}
+.bigstar button:focus-visible{outline:2px solid var(--ink)}
+.st{position:relative;display:inline-block;flex:none}
+.st>span{position:absolute;left:0;top:0;height:100%;width:50%;overflow:hidden}
+.st svg{display:block}
+.fld input[type=date],.fld input[type=time]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:block;text-align:left;line-height:44px}
+.fld input::-webkit-date-and-time-value{text-align:left}
+.fld input:disabled{opacity:.45}
+.row>.fld{flex:1 1 0;min-width:0}
+.allday{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;cursor:pointer;min-height:36px;margin-top:-4px}
+.allday input{accent-color:var(--ink);width:20px;height:20px;margin:0}
+.ev.rec{opacity:.55}
+.cell .b.rec{opacity:.45}
+.cell.out .b.rec{opacity:.25}
+.picks{display:flex;flex-direction:column;gap:10px}
+.pickbtn{display:flex;align-items:center;gap:14px;padding:14px;border-radius:20px;border:0;background:#fff;box-shadow:0 1px 3px rgba(42,30,24,.08);text-align:left;font-size:18px;font-weight:800;min-height:72px}
+.pickbtn.new{background:none;border:1.5px dashed #DCC6B6;box-shadow:none;font-size:15px;justify-content:center}
 .colors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .colors button{display:flex;align-items:center;gap:8px;min-height:48px;padding:0 12px;border-radius:14px;border:2px solid transparent;background:var(--bg);font-weight:700;font-size:13px;text-align:left}
 .colors button[aria-pressed=true]{border-color:var(--ink);background:#fff}
@@ -192,6 +210,9 @@ const FIREBASE_CONFIG = {
   appId: "1:252325256926:web:d69bcca75511a196c0ac4f"
 };
 const FIREBASE_VERSION = '10.12.2';
+// Account condiviso: la sua password è il "codice di casa", scritto una volta per dispositivo.
+const CASA_EMAIL = 'casa@girasoli-957e7.firebaseapp.com';
+const ME_KEY = 'girasoli-me';
 
 // ================== COSTANTI ==================
 const COLORS = [
@@ -225,6 +246,9 @@ const deep = (c) => mix(c, '#000000', 0.3);
 const sum = (a) => a.reduce((x, y) => x + y, 0);
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 const mapsUrl = (q) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + (m || 0); };
+const fromMin = (x) => { x = ((x % 1440) + 1440) % 1440; return pad(Math.floor(x / 60)) + ':' + pad(x % 60); };
+const nextHour = () => fromMin((new Date().getHours() + 1) * 60);
 const pv = (c) => `--c:${c};--s:${soft(c)};--d:${deep(c)}`;
 
 const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
@@ -243,7 +267,11 @@ const IC = {
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'
 };
 const STAR = 'M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z';
-const stars = (r, s = 14) => [1, 2, 3, 4, 5].map((i) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path d="${STAR}" fill="${r >= i ? '#E39A2D' : r >= i - 0.5 ? '#F3D29C' : '#EADDD2'}"/></svg>`).join('');
+const starSvg = (fill, s) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path d="${STAR}" fill="${fill}"/></svg>`;
+const star1 = (st, s) => st === 1 ? starSvg('#E39A2D', s) : st === 0.5 ? `<span class="st" style="width:${s}px;height:${s}px">${starSvg('#EADDD2', s)}<span>${starSvg('#E39A2D', s)}</span></span>` : starSvg('#EADDD2', s);
+const stars = (r, s = 14) => [1, 2, 3, 4, 5].map((i) => star1(r >= i ? 1 : r >= i - 0.5 ? 0.5 : 0, s)).join('');
+const fmtR = (v) => String(v).replace('.', ',');
+const votoLbl = (v) => fmtR(v) + (v === 1 ? ' stella' : ' stelle');
 
 // ================== STATO ==================
 const S = {
@@ -343,7 +371,7 @@ const FireDB = {
     this.unsubs = [];
     au.onAuthStateChanged(this.auth, (user) => {
       this.unsubs.forEach((u) => u()); this.unsubs = [];
-      S.authed = !!user; S.me = user ? user.uid : null; S.loaded = false;
+      S.authed = !!user; S.me = user ? localStorage.getItem(ME_KEY) : null; S.loaded = false;
       if (!user) { render(); return; }
       const data = { users: [], events: [], items: [], goals: [], places: [] };
       const got = new Set();
@@ -371,7 +399,7 @@ function onData(data) {
   S.events = data.events; S.items = data.items; S.goals = data.goals; S.places = data.places;
   S.loaded = true;
   render();
-  if (!me() && !S.sheet) openProfile(true);
+  if (S.mode === 'demo' && !me() && !S.sheet) openProfile(true);
 }
 
 // ================== CALCOLI ==================
@@ -401,6 +429,7 @@ const $app = document.getElementById('app'), $sheet = document.getElementById('s
 function render() {
   if (S.mode === 'firebase' && !S.authed) { $app.innerHTML = loginView(); return; }
   if (!S.loaded) { $app.innerHTML = '<div class="loading">Caricamento…</div>'; return; }
+  if (S.mode === 'firebase' && !me() && !S.creating) { $app.innerHTML = pickerView(); return; }
   const a = document.activeElement, keep = a && a.id && $app.contains(a) ? { id: a.id, v: a.value, s: a.selectionStart, e: a.selectionEnd } : null;
   const c = colorOf(S.me);
   document.documentElement.style.setProperty('--me', c);
@@ -535,11 +564,11 @@ function doneSection() {
 // ---------- calendario ----------
 function legend() {
   const o = other();
-  return `<div class="legend"><span><span class="dot" style="background:${colorOf(S.me)}"></span>${esc(nameOf(S.me))}</span>${o ? `<span><span class="dot" style="background:${colorOf(o.id)}"></span>${esc(o.name)}</span>` : ''}<span><span class="dot" style="background:${INS}"></span>Insieme</span><span><span class="dot" style="background:${IMP}"></span>Importante</span></div>`;
+  return `<div class="legend"><span><span class="dot" style="background:${colorOf(S.me)}"></span>${esc(nameOf(S.me))}</span>${o ? `<span><span class="dot" style="background:${colorOf(o.id)}"></span>${esc(o.name)}</span>` : ''}<span><span class="dot" style="background:${INS}"></span>Insieme</span><span><span class="dot" style="background:${IMP}"></span>Importante</span><span><span class="dot" style="background:var(--muted);opacity:.45"></span>Più chiari: si ripetono</span></div>`;
 }
 function evButton(o, cls) {
   const ev = o.ev, tag = evTag(ev, true);
-  return `<button class="${cls}" style="${pv(evColor(ev))}" data-a="ev-open" data-id="${ev.id}" data-d="${o.date}"><span class="dot" style="background:var(--c);width:8px;height:8px"></span><span class="t">${ev.time || 'tutto'}</span><span class="x">${esc(ev.title)}${tag && !ev.important && ev.owner !== 'both' ? `<span class="f">${esc(tag)}</span>` : ''}</span>${ev.repeat !== 'none' ? `<span style="color:var(--d)" title="Si ripete">${svg(IC.rep, 15)}</span>` : ''}</button>`;
+  return `<button class="${cls}${ev.repeat !== 'none' ? ' rec' : ''}" style="${pv(evColor(ev))}" data-a="ev-open" data-id="${ev.id}" data-d="${o.date}"><span class="dot" style="background:var(--c);width:8px;height:8px"></span><span class="t">${ev.time || 'tutto'}</span><span class="x">${esc(ev.title)}${tag && !ev.important && ev.owner !== 'both' ? `<span class="f">${esc(tag)}</span>` : ''}</span>${ev.repeat !== 'none' ? `<span style="color:var(--d)" title="Si ripete">${svg(IC.rep, 15)}</span>` : ''}</button>`;
 }
 function calendarView() {
   const a = parse(S.anchor);
@@ -553,7 +582,7 @@ function calendarView() {
     nav = cap(MESI[a.getMonth()]) + ' ' + a.getFullYear();
     const cells = Array.from({ length: 42 }, (_, i) => {
       const dd = addDays(start, i), d = ymd(dd), list = occ.filter((o) => o.date === d), out = dd.getMonth() !== a.getMonth();
-      return `<button class="cell ${out ? 'out' : ''} ${d === S.selDay ? 'sel' : ''} ${d === t ? 'today' : ''}" data-a="day-sel" data-d="${d}" aria-label="${longDate(d)}, ${list.length} impegni" aria-pressed="${d === S.selDay}"><span class="n">${dd.getDate()}</span>${list.slice(0, 3).map((o) => `<span class="b" style="background:${evColor(o.ev)}">${esc(o.ev.title)}</span>`).join('')}${list.length > 3 ? `<span class="more">+${list.length - 3}</span>` : ''}</button>`;
+      return `<button class="cell ${out ? 'out' : ''} ${d === S.selDay ? 'sel' : ''} ${d === t ? 'today' : ''}" data-a="day-sel" data-d="${d}" aria-label="${longDate(d)}, ${list.length} impegni" aria-pressed="${d === S.selDay}"><span class="n">${dd.getDate()}</span>${list.slice(0, 3).map((o) => `<span class="b${o.ev.repeat !== 'none' ? ' rec' : ''}" style="background:${evColor(o.ev)}">${esc(o.ev.title)}</span>`).join('')}${list.length > 3 ? `<span class="more">+${list.length - 3}</span>` : ''}</button>`;
     }).join('');
     const sel = occurrences(S.selDay, S.selDay);
     body = `<div class="mhead">${['L','M','M','G','V','S','D'].map((x) => `<span>${x}</span>`).join('')}</div><div class="mgrid">${cells}</div>
@@ -566,10 +595,14 @@ function calendarView() {
 }
 
 function loginView() {
-  return `<form class="login" data-f="login"><img src="icon-192.png" alt="" width="96" height="96" style="border-radius:24px"><h1>Girasoli</h1><div class="muted" style="font-size:15px;line-height:1.5">Entra con l’email e la password del vostro account.</div>
-    <label class="fld">Email<input id="lg-email" type="email" autocomplete="username" required></label>
-    <label class="fld">Password<input id="lg-pw" type="password" autocomplete="current-password" required></label>
+  return `<form class="login" data-f="login"><img src="icon-192.png" alt="" width="96" height="96" style="border-radius:24px"><h1>Girasoli</h1><div class="muted" style="font-size:15px;line-height:1.5">Scrivi il codice di casa. Serve solo la prima volta su questo dispositivo.</div>
+    <label class="fld">Codice di casa<input id="lg-code" type="password" autocomplete="current-password" required></label>
     <div class="err" id="lg-err"></div><button class="btn">Entra</button></form>`;
+}
+function pickerView() {
+  const users = Object.values(S.users).filter((u) => u.name).sort((a, b) => a.name.localeCompare(b.name));
+  return `<div class="login"><img src="icon-192.png" alt="" width="96" height="96" style="border-radius:24px"><h1>Chi sei?</h1><div class="muted" style="font-size:15px;line-height:1.5">Scegli il tuo profilo. Questo dispositivo se lo ricorderà.</div>
+    <div class="picks">${users.map((u) => `<button class="pickbtn" data-a="pick-me" data-id="${u.id}">${avatar(u, 52)}<span>${esc(u.name)}</span></button>`).join('')}${users.length < 2 ? '<button class="pickbtn new" data-a="pick-new">+ Crea un nuovo profilo</button>' : ''}</div></div>`;
 }
 
 // ================== FOGLI ==================
@@ -579,7 +612,7 @@ function openSheet(html, opts = {}) {
   document.body.style.overflow = 'hidden';
   if (opts.mount) opts.mount($sheet);
 }
-function closeSheet() { S.sheet = null; $sheet.innerHTML = ''; document.body.style.overflow = ''; if (S.loaded && !me()) openProfile(true); }
+function closeSheet() { S.sheet = null; $sheet.innerHTML = ''; document.body.style.overflow = ''; if (S.creating && !me()) { S.creating = false; S.me = null; render(); } }
 const closeBtn = () => `<button class="close" data-a="close" aria-label="Chiudi">${svg(IC.x, 18)}</button>`;
 const pressed = (g) => { const b = $sheet.querySelector(`[data-g="${g}"][aria-pressed="true"]`); return b ? b.dataset.v : null; };
 
@@ -598,20 +631,22 @@ function openEvent(id, date) {
 
 function openEventForm(id, date) {
   const ev = id ? S.events.find((e) => e.id === id) : null, o = other();
-  const f = ev || { title:'', date: date || (S.tab === 'calendario' && S.cal === 'month' ? S.selDay : today()), time:'', end:'', repeat:'none', owner: S.me, important:false, place:'', maps:'', desc:'' };
+  const f = ev || { title:'', date: date || (S.tab === 'calendario' && S.cal === 'month' ? S.selDay : today()), time: nextHour(), end: fromMin(toMin(nextHour()) + 60), repeat:'none', owner: S.me, important:false, place:'', maps:'', desc:'' };
+  const allDay = !f.time;
   const who = f.owner === 'both' ? 'both' : f.owner === S.me ? 'me' : 'other';
   const whoBtn = (v, l, c, dis) => `<button type="button" class="chip" data-a="choose" data-g="who" data-v="${v}" aria-pressed="${who === v}" style="--cc:${c};--cs:${soft(c)}" ${dis ? 'disabled' : ''}><span class="dot" style="background:${c}"></span>${esc(l)}</button>`;
   openSheet(`<form data-f="ev-save" data-id="${ev ? ev.id : ''}" style="display:flex;flex-direction:column;gap:14px"><div class="sh-top"><h2>${ev ? 'Modifica impegno' : 'Nuovo impegno'}</h2>${closeBtn()}</div>
     <label class="fld">Cosa<input id="f-title" value="${esc(f.title)}" placeholder="Es. Cena da mamma" required autocomplete="off"></label>
     <label class="fld">Giorno<input id="f-date" type="date" value="${f.date}" required></label>
-    <div class="row"><label class="fld">Dalle<input id="f-time" type="time" value="${f.time || ''}"></label><label class="fld">Alle<input id="f-end" type="time" value="${f.end || ''}"></label></div>
+    <div class="row"><label class="fld">Dalle<input id="f-time" type="time" value="${f.time || ''}" ${allDay ? 'disabled' : ''}></label><label class="fld">Alle<input id="f-end" type="time" value="${f.end || ''}" ${allDay ? 'disabled' : ''}></label></div>
+    <label class="allday"><input type="checkbox" id="f-allday" ${allDay ? 'checked' : ''}>Tutto il giorno</label>
     <div class="fld">Ripeti<div class="chips">${Object.entries(REP).map(([k, l]) => `<button type="button" class="chip" data-a="choose" data-g="rep" data-v="${k}" aria-pressed="${f.repeat === k}">${l}</button>`).join('')}</div></div>
     <div class="fld">Per chi<div class="chips">${whoBtn('me', 'Per me', colorOf(S.me))}${whoBtn('other', o ? 'Per ' + o.name : 'Per l’altra persona', o ? colorOf(o.id) : NEUTRO, !o)}${whoBtn('both', 'Insieme', INS)}</div></div>
     <label class="impbox"><span><span style="display:block;font-weight:800;font-size:14px;color:var(--imp)">Importante</span><span class="small muted">Diventa rosso per tutti e due</span></span><input id="f-imp" type="checkbox" role="switch" data-a="ev-preview" ${f.important ? 'checked' : ''}></label>
     <label class="fld">Luogo<input id="f-place" value="${esc(f.place)}" placeholder="Es. Cinema Barberini" autocomplete="off"></label>
     <label class="fld">Link Google Maps (facoltativo)<input id="f-maps" type="url" value="${esc(f.maps)}" placeholder="Incolla il link del posto"></label>
     <label class="fld">Descrizione<textarea id="f-desc" rows="3" placeholder="Note, cosa portare…">${esc(f.desc)}</textarea></label>
-    <button class="btn" id="f-save"><span class="dot" id="f-dot"></span><span id="f-lbl">Salva</span></button></form>`, { label: ev ? 'Modifica impegno' : 'Nuovo impegno', mount: evPreview });
+    <button class="btn" id="f-save"><span class="dot" id="f-dot"></span><span id="f-lbl">Salva</span></button></form>`, { label: ev ? 'Modifica impegno' : 'Nuovo impegno', mount: () => { S.sheet.dur = f.time && f.end ? (toMin(f.end) - toMin(f.time) + 1440) % 1440 || 60 : 60; evPreview(); } });
 }
 function evPreview() {
   const imp = $sheet.querySelector('#f-imp'); if (!imp) return;
@@ -632,7 +667,7 @@ function openProfile(setup) {
     <div class="photo-row"><div id="p-av">${avatar({ ...u, photo, color: cur }, 72)}</div><div style="display:flex;flex-direction:column;gap:6px"><label class="filebtn">Scegli foto<input id="p-photo" type="file" accept="image/*"></label>${photo ? '<button type="button" class="link-btn" style="padding:0;min-height:30px" data-a="photo-clear">Togli foto</button>' : ''}</div></div>
     <label class="fld">Nome<input id="p-name" value="${esc(u.name)}" required autocomplete="off" placeholder="Come ti chiami?"></label>
     <div class="fld">Il tuo colore<div class="colors">${COLORS.map((c) => { const taken = o && o.color === c.k; return `<button type="button" data-a="choose" data-g="color" data-v="${c.k}" aria-pressed="${cur === c.k}" ${taken ? 'disabled' : ''}><span class="dot" style="background:${c.c};width:18px;height:18px"></span><span>${c.n}${taken ? `<span class="tiny muted" style="display:block">di ${esc(o.name)}</span>` : ''}</span></button>`; }).join('')}</div><span class="tiny muted" style="font-weight:500">Rosso e blu sono riservati a importante e insieme.</span></div>
-    <button class="btn">Salva</button>${!setup && S.mode === 'firebase' ? '<button type="button" class="btn light" data-a="logout">Esci</button>' : ''}</form>`, {
+    <button class="btn">Salva</button>${!setup && S.mode === 'firebase' ? '<button type="button" class="btn light" data-a="switch-me">Cambia profilo</button>' : ''}</form>`, {
     label: 'Profilo', locked: setup,
     mount: (root) => {
       S.sheet.photo = photo;
@@ -669,8 +704,8 @@ function openPlace(id) {
     const a = placeAvg(p), mine = (p.votes || {})[S.me] || 0, o = other(), theirs = o ? (p.votes || {})[o.id] : 0;
     openSheet(`<div class="sh-top"><div><span class="chiptag" style="${pv(colorOf(S.me))}">${CATS.find((c) => c[0] === p.cat)[1]}</span><h2 style="font-size:24px;margin-top:8px">${esc(p.name)}</h2><div class="small muted" style="margin-top:2px">${esc(p.zone || '')}</div></div>${closeBtn()}</div>
       <a class="btn light" href="${esc(placeMaps(p))}" target="_blank" rel="noopener">${svg(IC.map, 18)}Apri in Google Maps</a>
-      ${p.visited ? `<div class="fld">Il tuo voto<div class="bigstars">${[1, 2, 3, 4, 5].map((i) => `<button data-a="place-vote" data-id="${p.id}" data-v="${i}" aria-label="${i} stelle" aria-pressed="${mine === i}"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="${STAR}" fill="${mine >= i ? '#E39A2D' : '#EADDD2'}"/></svg></button>`).join('')}</div></div>
-        <div class="small muted">${a ? `Media ${String(a.avg).replace('.', ',')} su ${a.n} ${a.n === 1 ? 'voto' : 'voti'}` : 'Ancora nessun voto'}${o ? ` · ${esc(o.name)}: ${theirs ? theirs + ' stelle' : 'non ha votato'}` : ''}</div>` : '<div class="muted" style="font-size:14px">Quando ci andate, segnatelo come visitato e potrete votarlo.</div>'}
+      ${p.visited ? `<div class="fld">Il tuo voto${mine ? ': ' + votoLbl(mine) : ''}<div class="bigstars" role="group" aria-label="Il tuo voto">${[1, 2, 3, 4, 5].map((i) => `<div class="bigstar">${star1(mine >= i ? 1 : mine >= i - 0.5 ? 0.5 : 0, 32)}<button data-a="place-vote" data-id="${p.id}" data-v="${i - 0.5}" aria-label="${votoLbl(i - 0.5)}" aria-pressed="${mine === i - 0.5}"></button><button data-a="place-vote" data-id="${p.id}" data-v="${i}" aria-label="${votoLbl(i)}" aria-pressed="${mine === i}"></button></div>`).join('')}</div><span class="tiny muted" style="font-weight:500">Tocca la metà sinistra di una stella per dare mezzo voto.</span></div>
+        <div class="small muted">${a ? `Media ${String(a.avg).replace('.', ',')} su ${a.n} ${a.n === 1 ? 'voto' : 'voti'}` : 'Ancora nessun voto'}${o ? ` · ${esc(o.name)}: ${theirs ? votoLbl(theirs) : 'non ha votato'}` : ''}</div>` : '<div class="muted" style="font-size:14px">Quando ci andate, segnatelo come visitato e potrete votarlo.</div>'}
       <button class="btn" data-a="place-visit" data-id="${p.id}">${p.visited ? 'Sposta in da visitare' : 'Ci siamo stati: segna come visitato'}</button>
       <div class="btns"><button class="btn light" data-a="place-edit" data-id="${p.id}">Modifica</button><button class="btn red" data-a="place-del" data-id="${p.id}">Elimina</button></div>`, { label: 'Posto' });
     return;
@@ -719,6 +754,9 @@ document.addEventListener('click', (e) => {
     case 'profile-edit': openProfile(false); break;
     case 'photo-clear': S.sheet.photo = ''; refreshAv(); el.remove(); break;
     case 'logout': closeSheet(); FireDB.logout(); break;
+    case 'pick-me': S.me = id; localStorage.setItem(ME_KEY, id); render(); window.scrollTo(0, 0); break;
+    case 'pick-new': S.me = 'p' + uid(); S.creating = true; render(); openProfile(true); break;
+    case 'switch-me': localStorage.removeItem(ME_KEY); S.me = null; closeSheet(); render(); break;
     case 'place-new': openPlace(null); break;
     case 'place-open': openPlace(id); break;
     case 'place-edit': S.sheet = { edit: true }; openPlace(id); break;
@@ -735,7 +773,18 @@ document.addEventListener('change', (e) => {
   if (a === 'goal-toggle') run(DB.update('goals', el.dataset.id, { done: el.checked }));
   if (a === 'ev-preview') evPreview();
 });
-document.addEventListener('input', (e) => { if (e.target.id === 'p-name') refreshAv(); });
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.id === 'p-name') refreshAv();
+  if (t.id === 'f-time' && t.value) { const end = $sheet.querySelector('#f-end'); end.value = fromMin(toMin(t.value) + (S.sheet.dur || 60)); }
+  if (t.id === 'f-end' && t.value) { const st = $sheet.querySelector('#f-time').value; if (st) S.sheet.dur = (toMin(t.value) - toMin(st) + 1440) % 1440 || 60; }
+});
+document.addEventListener('change', (e) => {
+  if (e.target.id !== 'f-allday') return;
+  const on = e.target.checked, st = $sheet.querySelector('#f-time'), end = $sheet.querySelector('#f-end');
+  st.disabled = on; end.disabled = on;
+  if (!on && !st.value) { st.value = nextHour(); end.value = fromMin(toMin(st.value) + (S.sheet.dur || 60)); }
+});
 
 document.addEventListener('submit', async (e) => {
   const f = e.target, k = f.dataset.f; if (!k) return;
@@ -745,14 +794,17 @@ document.addEventListener('submit', async (e) => {
   if (k === 'goal-add') { const t = val('#in-goal'); if (!t) return; run(DB.add('goals', { owner: S.me, week: weekOf(today()), text: t, mult: Number(val('#in-mult')) || 1, done: false, createdAt: Date.now() })); const i = document.getElementById('in-goal'); if (i) i.value = ''; }
   if (k === 'ev-save') {
     const w = pressed('who'), o = other(), id = f.dataset.id;
-    const data = { title: val('#f-title'), date: val('#f-date'), time: val('#f-time'), end: val('#f-end'), repeat: pressed('rep') || 'none', owner: w === 'both' ? 'both' : w === 'other' && o ? o.id : S.me, important: f.querySelector('#f-imp').checked, place: val('#f-place'), maps: val('#f-maps'), desc: val('#f-desc') };
+    const allDay = f.querySelector('#f-allday').checked, st = allDay ? '' : val('#f-time');
+    const data = { title: val('#f-title'), date: val('#f-date'), time: st, end: st ? (val('#f-end') || fromMin(toMin(st) + 60)) : '', repeat: pressed('rep') || 'none', owner: w === 'both' ? 'both' : w === 'other' && o ? o.id : S.me, important: f.querySelector('#f-imp').checked, place: val('#f-place'), maps: val('#f-maps'), desc: val('#f-desc') };
     if (!data.title || !data.date) return;
     if (id) run(DB.update('events', id, data)); else run(DB.add('events', { ...data, createdBy: S.me, createdAt: Date.now() }));
     closeSheet(); if (S.cal === 'month') S.selDay = data.date; S.anchor = data.date; render();
   }
   if (k === 'profile-save') {
     const name = val('#p-name'); if (!name) return;
-    run(DB.put('users', S.me, { name, color: pressed('color') || 'oliva', photo: S.sheet.photo || '', email: S.mode === 'firebase' && FireDB.auth.currentUser ? FireDB.auth.currentUser.email : '' }));
+    run(DB.put('users', S.me, { name, color: pressed('color') || 'oliva', photo: S.sheet.photo || '' }));
+    if (S.mode === 'firebase') localStorage.setItem(ME_KEY, S.me);
+    S.creating = false;
     S.sheet = null; $sheet.innerHTML = ''; document.body.style.overflow = '';
   }
   if (k === 'place-save') {
@@ -763,8 +815,8 @@ document.addEventListener('submit', async (e) => {
   }
   if (k === 'login') {
     const err = document.getElementById('lg-err'); err.textContent = '';
-    try { await FireDB.login(val('#lg-email'), document.getElementById('lg-pw').value); }
-    catch (x) { err.textContent = /invalid|wrong|not-found|credential/.test(x.code || '') ? 'Email o password sbagliate.' : 'Accesso non riuscito: ' + (x.code || x.message); }
+    try { await FireDB.login(CASA_EMAIL, document.getElementById('lg-code').value); }
+    catch (x) { err.textContent = /invalid|wrong|not-found|credential/.test(x.code || '') ? 'Codice sbagliato.' : 'Accesso non riuscito: ' + (x.code || x.message); }
   }
 });
 
